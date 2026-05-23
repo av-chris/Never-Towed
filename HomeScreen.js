@@ -6,7 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 const { width, height } = Dimensions.get('window');
 
-export default function HomeScreen() {
+export default function HomeScreen({navigation}) {
   const [fontsLoaded] = useFonts({ Poppins_400Regular, Poppins_700Bold });
   if (!fontsLoaded) return null;
 
@@ -17,7 +17,7 @@ export default function HomeScreen() {
       {/* TOP WIDGET */}
       <View style={styles.TopWidget}>
         <TouchableOpacity style={[styles.Widgets, styles.MainWidget]}>
-            <View styles={styles.MainWidgetTitle}>
+            <View style={styles.MainWidgetTitle}>
                 <Text style={styles.MainWidgetLabel}>Current Vehicle</Text>
             </View>
                 <View style={styles.MainWidgetInfo}>
@@ -62,7 +62,7 @@ export default function HomeScreen() {
 
             </TouchableOpacity>
           </View>
-          <TouchableOpacity style={styles.MoreVehicles}>
+          <TouchableOpacity style={styles.MoreVehicles } onPress={() => navigation.navigate('AddVehicle')}>
             <Ionicons name="add-circle" size={22} color="#8e8e93" />
             <Text style={styles.AddVehicle}>Add Vehicle</Text>
           </TouchableOpacity>
@@ -91,7 +91,7 @@ export default function HomeScreen() {
               <Text style={styles.VehicleDetail}>Month Day • 24hrs</Text>
             </View>
           </View>
-          <TouchableOpacity style={styles.MoreVehicles}>
+          <TouchableOpacity style={styles.MoreVehicles} onPress={() => navigation.navigate('Settings')}>
             <Ionicons name="settings-outline" size={22} color="#8e8e93" />
             <Text style={styles.AddVehicle}>Settings</Text>
           </TouchableOpacity>
@@ -124,7 +124,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
     MainWidgetTitle:{
-    flex:1,
+    flex:.5,
   },
   MainWidgetInfo:{
     flexDirection:'row'
@@ -136,22 +136,24 @@ const styles = StyleSheet.create({
   NickName: {
     color: '#ffffff',
     fontFamily: 'Poppins_700Bold',
-    fontSize: 18,
-    marginBottom: 6,
+    fontSize: 22,
+    marginTop:22,
+    marginBottom: 26,
   },
   CarDetail: {
     color: '#8e8e93',
     fontFamily: 'Poppins_400Regular',
-    fontSize: 13,
-    marginBottom: 2,
+    fontSize: 18,
+    marginBottom: 26,
   },
   PlateText: {
-    color: '#ffffff',
-    fontFamily: 'Poppins_700Bold',
-    fontSize: 13,
-    marginTop: 6,
+    color: '#8e8e93',
+    fontFamily: 'Poppins_400Regular',
+    fontSize: 18,
+    marginTop: 0,
   },
   CircularTimer: {
+    marginTop:60,
     width: width * 0.32,
     height: width * 0.32,
     borderRadius: width * 0.5,

@@ -2,17 +2,15 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, TouchableOpacity, TextInput, ImageBackground } from 'react-native';
 import { useFonts, Poppins_400Regular, Poppins_700Bold } from '@expo-google-fonts/poppins';
 import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function LoginScreen({navigation}) {
   const [fontsLoaded] = useFonts({ Poppins_400Regular, Poppins_700Bold });
   if (!fontsLoaded) return null;
 
   return (
-    <ImageBackground
-      source={require('./assets/eddie-pipocas-25Js9HESu4U-unsplash.jpg')}
-      style={styles.container}
-      resizeMode="cover"
-    >
+    <LinearGradient colors={['#1a1a2e', '#0d0d0d']} style={styles.container}>
+      
       <StatusBar style="light" />
       <View style={styles.overlay}>
         <Text style={styles.headerText}>Never Towed</Text>
@@ -41,7 +39,7 @@ export default function LoginScreen({navigation}) {
           </View>
         </BlurView>
       </View>
-    </ImageBackground>
+    </LinearGradient>
   );
 }
 
