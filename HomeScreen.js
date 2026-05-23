@@ -45,20 +45,20 @@ export default function HomeScreen({navigation}) {
           <View style={styles.QuickVehicles}>
             <TouchableOpacity style={styles.VehicleCard}>
               <Text style={styles.VehicleNick}>Saved Vehicle NickName 1</Text>
-              <Text style={styles.VehicleDetail}>Make • PLateNumber</Text>
-              <Text style={styles.VehicleDetail}>Model • Year</Text>
+              <Text style={styles.VehicleDetail}>Make • Model</Text>
+              <Text style={styles.VehicleDetail}>Year • PLateNumber</Text>
 
             </TouchableOpacity>
              <TouchableOpacity style={styles.VehicleCard}>
               <Text style={styles.VehicleNick}>Saved Vehicle NickName 2</Text>
-              <Text style={styles.VehicleDetail}>Make • PLateNumber</Text>
-              <Text style={styles.VehicleDetail}>Model • Year</Text>
+              <Text style={styles.VehicleDetail}>Make • Model</Text>
+              <Text style={styles.VehicleDetail}>Year • PLateNumber</Text>
 
             </TouchableOpacity>
             <TouchableOpacity style={styles.VehicleCard}>
               <Text style={styles.VehicleNick}>Saved Vehicle NickName 3</Text>
-              <Text style={styles.VehicleDetail}>Make • PLateNumber</Text>
-              <Text style={styles.VehicleDetail}>Model • Year</Text>
+              <Text style={styles.VehicleDetail}>Make • Model</Text>
+              <Text style={styles.VehicleDetail}>Year • PLateNumber</Text>
 
             </TouchableOpacity>
           </View>
@@ -74,20 +74,20 @@ export default function HomeScreen({navigation}) {
           <View style={styles.History}>
             <View style={styles.VehicleCard}>
               <Text style={styles.VehicleNick}>Vehicle NickName 1</Text>
-                <Text style={styles.VehicleDetail}>Make • PLateNumber</Text>
-              <Text style={styles.VehicleDetail}>Model • Year</Text>
+                <Text style={styles.VehicleDetail}>Make • Model</Text>
+              <Text style={styles.VehicleDetail}>Year • PLateNumber</Text>
               <Text style={styles.VehicleDetail}>Month Day • 24hrs</Text>
             </View>
             <View style={styles.VehicleCard}>
               <Text style={styles.VehicleNick}>Vehicle NickName 2</Text>
-                <Text style={styles.VehicleDetail}>Make • PLateNumber</Text>
-              <Text style={styles.VehicleDetail}>Model • Year</Text>
+                <Text style={styles.VehicleDetail}>Make • Model</Text>
+              <Text style={styles.VehicleDetail}>Year • PLateNumber</Text>
               <Text style={styles.VehicleDetail}>Month Day • 24hrs</Text>
             </View>
             <View style={styles.VehicleCard}>
               <Text style={styles.VehicleNick}>Vehicle NickName 3</Text>
-                <Text style={styles.VehicleDetail}>Make • PLateNumber</Text>
-              <Text style={styles.VehicleDetail}>Model • Year</Text>
+                <Text style={styles.VehicleDetail}>Make • Model</Text>
+              <Text style={styles.VehicleDetail}>Year • PLateNumber</Text>
               <Text style={styles.VehicleDetail}>Month Day • 24hrs</Text>
             </View>
           </View>

@@ -8,7 +8,17 @@ export default function AddVehicle({ navigation }) {
 
   return (
     <LinearGradient colors={['#1a1a2e', '#0d0d0d']} style={styles.container}>
-      
+      <View style={styles.MainScreen}>
+
+      </View>
+
+
+
+
+
+
+
+
     </LinearGradient>
   );
 }
@@ -16,5 +26,10 @@ export default function AddVehicle({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  MainScreen:{
+    flex:1,
+    borderWidth:2,
+    borderColor:'red',
   },
 });
