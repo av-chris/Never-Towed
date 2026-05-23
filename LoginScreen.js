@@ -48,6 +48,7 @@ export default function LoginScreen({navigation}) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor:'#000000'
   },
   overlay: {
     flex: 1,

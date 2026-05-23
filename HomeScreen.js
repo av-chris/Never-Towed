@@ -1,212 +1,263 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, TouchableOpacity,Dimensions } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Dimensions } from 'react-native';
 import { useFonts, Poppins_400Regular, Poppins_700Bold } from '@expo-google-fonts/poppins';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+
 const { width, height } = Dimensions.get('window');
 
 export default function HomeScreen() {
-    const [fontsLoaded] = useFonts({ Poppins_400Regular, Poppins_700Bold });
+  const [fontsLoaded] = useFonts({ Poppins_400Regular, Poppins_700Bold });
   if (!fontsLoaded) return null;
-  return (
 
-    <View style={styles.container}>
-        <View style={styles.TopWidget}>
-            <View style={[styles.Widgets ,styles.MainWidget]}>
-                <View style={[styles.TextStyles, styles.InfoBox]}>
-                    <Text style={[styles.TextStyles,styles.CurrentVehicle]}>NickName</Text>
-                    <Text style={[styles.TextStyles,styles.CurrentVehicle]}>Make</Text>
-                    <Text style={[styles.TextStyles,styles.CurrentVehicle]}>Model</Text>
-                    <Text style={[styles.TextStyles,styles.CurrentVehicle]}>Year</Text>
-                    <Text style={[styles.TextStyles,styles.CurrentVehicle]}>Plate</Text>
-                </View>
-                <View style={styles.CircularTimer}>
-                    <Text style={[styles.TextStyles, styles.TimerText]}>24:00</Text>
-                </View>
+  return (
+    <LinearGradient colors={['#1a1a2e', '#0d0d0d']} style={styles.container}>
+      <StatusBar style="light" />
+
+      {/* TOP WIDGET */}
+      <View style={styles.TopWidget}>
+        <TouchableOpacity style={[styles.Widgets, styles.MainWidget]}>
+            <View styles={styles.MainWidgetTitle}>
+                <Text style={styles.MainWidgetLabel}>Current Vehicle</Text>
             </View>
+                <View style={styles.MainWidgetInfo}>
+                    <View style={styles.InfoBox}>
+                        <Text style={styles.NickName}>My Car</Text>
+                        <Text style={styles.CarDetail}>Toyota • Camry</Text>
+                        <Text style={styles.CarDetail}>2011 • White</Text>
+                        <Text style={styles.PlateText}>ABC1234 • TX</Text>
+                    </View>
+                    <View style={styles.CircularTimer}>
+                        <Text style={styles.TimerText}>24:00</Text>
+                        <Text style={styles.TimerLabel}>Time Left</Text>
+                    </View>
+            </View>
+
+        </TouchableOpacity>
+      </View>
+
+      {/* BOTTOM WIDGETS */}
+      <View style={styles.BottomWidgets}>
+
+        {/* LEFT - VEHICLES */}
+        <View style={[styles.Widgets, styles.LeftWidget]}>
+          <Text style={styles.WidgetLabel}>Saved Vehicles</Text>
+          <View style={styles.QuickVehicles}>
+            <TouchableOpacity style={styles.VehicleCard}>
+              <Text style={styles.VehicleNick}>Saved Vehicle NickName 1</Text>
+              <Text style={styles.VehicleDetail}>Make • PLateNumber</Text>
+              <Text style={styles.VehicleDetail}>Model • Year</Text>
+
+            </TouchableOpacity>
+             <TouchableOpacity style={styles.VehicleCard}>
+              <Text style={styles.VehicleNick}>Saved Vehicle NickName 2</Text>
+              <Text style={styles.VehicleDetail}>Make • PLateNumber</Text>
+              <Text style={styles.VehicleDetail}>Model • Year</Text>
+
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.VehicleCard}>
+              <Text style={styles.VehicleNick}>Saved Vehicle NickName 3</Text>
+              <Text style={styles.VehicleDetail}>Make • PLateNumber</Text>
+              <Text style={styles.VehicleDetail}>Model • Year</Text>
+
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity style={styles.MoreVehicles}>
+            <Ionicons name="add-circle" size={22} color="#8e8e93" />
+            <Text style={styles.AddVehicle}>Add Vehicle</Text>
+          </TouchableOpacity>
         </View>
-        <View style={styles.BottomWidgets}>
-            <View style={[styles.Widgets,styles.LeftWidget]}>
-                <View style={styles.QuickVehicles}>
-                    <View style={styles.Vehicles3}>
-                    <Text style={[styles.TextStyles]}>NickName</Text>
-                    <Text style={[styles.TextStyles]}>Make</Text>
-                    <Text style={[styles.TextStyles]}>Model</Text>
-                    <Text style={[styles.TextStyles]}>Year</Text>
-                    <Text style={[styles.TextStyles]}>Plate</Text>
-                    </View>
-                    <View style={styles.Vehicles3}>
-                    <Text style={[styles.TextStyles]}>NickName</Text>
-                    <Text style={[styles.TextStyles]}>Make</Text>
-                    <Text style={[styles.TextStyles]}>Model</Text>
-                    <Text style={[styles.TextStyles]}>Year</Text>
-                    <Text style={[styles.TextStyles]}>Plate</Text>
-                    </View>
-                    <View style={styles.Vehicles3}>
-                    <Text style={[styles.TextStyles]}>NickName</Text>
-                    <Text style={[styles.TextStyles]}>Make</Text>
-                    <Text style={[styles.TextStyles]}>Model</Text>
-                    <Text style={[styles.TextStyles]}>Year</Text>
-                    <Text style={[styles.TextStyles]}>Plate</Text>
-                    </View>
-                </View>
-                <View style={styles.MoreVehicles}>
-                    <Ionicons style={styles.icon} name="add-circle" size={32} color="#8e8e93" />
-                    <Text style={[styles.TextStyles, styles.AddVehicle]}>  Add Vehicle</Text>
-                </View>
+
+        {/* RIGHT - HISTORY */}
+        <View style={[styles.Widgets, styles.RightWidget]}>
+          <Text style={styles.WidgetLabel}>History</Text>
+          <View style={styles.History}>
+            <View style={styles.VehicleCard}>
+              <Text style={styles.VehicleNick}>Vehicle NickName 1</Text>
+                <Text style={styles.VehicleDetail}>Make • PLateNumber</Text>
+              <Text style={styles.VehicleDetail}>Model • Year</Text>
+              <Text style={styles.VehicleDetail}>Month Day • 24hrs</Text>
             </View>
-            <View style={[styles.Widgets,styles.RightWidget]}>
-                <View style={styles.History}>
-                    <View style={styles.Vehicles3}>
-                    <Text style={[styles.TextStyles]}>NickName</Text>
-                    <Text style={[styles.TextStyles]}>Make</Text>
-                    <Text style={[styles.TextStyles]}>Model</Text>
-                    <Text style={[styles.TextStyles]}>Year</Text>
-                    <Text style={[styles.TextStyles]}>Plate</Text>
-                    </View>
-                    <View style={styles.Vehicles3}>
-                    <Text style={[styles.TextStyles]}>NickName</Text>
-                    <Text style={[styles.TextStyles]}>Make</Text>
-                    <Text style={[styles.TextStyles]}>Model</Text>
-                    <Text style={[styles.TextStyles]}>Year</Text>
-                    <Text style={[styles.TextStyles]}>Plate</Text>
-                    </View>
-                    <View style={styles.Vehicles3}>
-                    <Text style={[styles.TextStyles]}>NickName</Text>
-                    <Text style={[styles.TextStyles]}>Make</Text>
-                    <Text style={[styles.TextStyles]}>Model</Text>
-                    <Text style={[styles.TextStyles]}>Year</Text>
-                    <Text style={[styles.TextStyles]}>Plate</Text>
-                    </View>
-                </View>
-                <View style={styles.Settings}>
-                    <Ionicons style={styles.icon} name="settings-outline" size={24} color="#8e8e93"/>                    
-                    <Text style={[styles.TextStyles, styles.SettingsButton]}>Settings</Text>
-                </View>
+            <View style={styles.VehicleCard}>
+              <Text style={styles.VehicleNick}>Vehicle NickName 2</Text>
+                <Text style={styles.VehicleDetail}>Make • PLateNumber</Text>
+              <Text style={styles.VehicleDetail}>Model • Year</Text>
+              <Text style={styles.VehicleDetail}>Month Day • 24hrs</Text>
             </View>
+            <View style={styles.VehicleCard}>
+              <Text style={styles.VehicleNick}>Vehicle NickName 3</Text>
+                <Text style={styles.VehicleDetail}>Make • PLateNumber</Text>
+              <Text style={styles.VehicleDetail}>Model • Year</Text>
+              <Text style={styles.VehicleDetail}>Month Day • 24hrs</Text>
+            </View>
+          </View>
+          <TouchableOpacity style={styles.MoreVehicles}>
+            <Ionicons name="settings-outline" size={22} color="#8e8e93" />
+            <Text style={styles.AddVehicle}>Settings</Text>
+          </TouchableOpacity>
         </View>
-    </View>
+
+      </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-container: {
-  flex: 1,
-  backgroundColor: '#0d0d0d',
-},
-CurrentVehicle:{
-marginLeft:20,
-marginBottom:20,
-fontSize:20,
-},
-TextStyles:{
-    color:'#8e8e93',
+  container: {
+    flex: 1,
+  },
+  // TOP WIDGET
+  TopWidget: {
+    flex: 0.75,
+  },
+
+  MainWidget: {
+    flex: 1,
+    borderRadius: 20,
+    padding: 20,
+    borderWidth: 0.8,
+    borderColor: 'rgba(255,255,255,0.15)',
+    marginTop: 70,
+    marginBottom: 14,
+    marginHorizontal: 15,
+    flexDirection: 'column',
+    alignItems: 'center',
+  },
+    MainWidgetTitle:{
+    flex:1,
+  },
+  MainWidgetInfo:{
+    flexDirection:'row'
+  },
+  InfoBox: {
+    flex: 1,
+    paddingLeft: 8,
+  },
+  NickName: {
+    color: '#ffffff',
+    fontFamily: 'Poppins_700Bold',
+    fontSize: 18,
+    marginBottom: 6,
+  },
+  CarDetail: {
+    color: '#8e8e93',
     fontFamily: 'Poppins_400Regular',
-},
-Widgets: {
-  backgroundColor: '#1c1c1e',
-  color: '#8e8e93',
-},
-TopWidget:{
-  flex: .75,
-},
-MainWidget: {
+    fontSize: 13,
+    marginBottom: 2,
+  },
+  PlateText: {
+    color: '#ffffff',
+    fontFamily: 'Poppins_700Bold',
+    fontSize: 13,
+    marginTop: 6,
+  },
+  CircularTimer: {
+    width: width * 0.32,
+    height: width * 0.32,
+    borderRadius: width * 0.5,
+    borderWidth: 8,
+    borderColor: '#4cd964',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  TimerText: {
+    color: '#ffffff',
+    fontFamily: 'Poppins_700Bold',
+    fontSize: 20,
+    textAlign: 'center',
+  },
+  TimerLabel: {
+    color: '#8e8e93',
+    fontFamily: 'Poppins_400Regular',
+    fontSize: 11,
+    textAlign: 'center',
+  },
+  // BOTTOM WIDGETS
+  BottomWidgets: {
+    flex: 1,
+    flexDirection: 'row',
+  },
+  WidgetLabel: {
+    color: '#ffffff',
+    fontFamily: 'Poppins_700Bold',
+    fontSize: 13,
+    marginBottom: 8,
+  },
+  MainWidgetLabel:{
+    color: '#ffffff',
+    fontFamily: 'Poppins_700Bold',
+    fontSize: 13,
+  },
+
+  Widgets: {
+    backgroundColor: '#1c1c1e',
+  },
+  LeftWidget: {
+    flex: 1,
+    borderRadius: 20,
+    padding: 14,
+    borderWidth: 0.8,
+    borderColor: 'rgba(255,255,255,0.15)',
+    marginRight: 5,
+    marginLeft: 15,
+    marginBottom: 30,
+  },
+  RightWidget: {
+    flex: 1,
+    borderRadius: 20,
+    padding: 14,
+    borderWidth: 0.8,
+    borderColor: 'rgba(255,255,255,0.15)',
+    marginLeft: 5,
+    marginRight: 15,
+    marginBottom: 30,
+  },
+  QuickVehicles: {
+    flex: 1,
+  },
+  History: {
+    flex: 1,
+  },
+  VehicleCard: {
     flex:1,
-  borderRadius: 20,
-  overflow: 'hidden',
-  padding: 20,
-  borderWidth: 0.8,
-  borderColor: 'rgba(255,255,255,0.25)',
-  marginTop: 70,
-  marginBottom: 14,
-  marginLeft:15,
-  marginRight:15,
-  flexDirection:'row',
-},
-InfoBox:{
+    backgroundColor: '#2c2c2e',
+    borderRadius: 10,
+    padding: 8,
+    marginBottom: 6,
+  },
+  VehicleNick: {
+    color: '#ffffff',
+    fontFamily: 'Poppins_700Bold',
+    fontSize: 12,
+  },
+  VehicleDetail: {
+    color: '#8e8e93',
+    fontFamily: 'Poppins_400Regular',
+    fontSize: 13,
+  },
+  MoreVehicles: {
+
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingTop: 8,
+    gap: 6,
+  },
+  AddVehicle: {
     flex:1,
-  borderWidth: 0.8,
-  borderColor: 'rgba(255,255,255,0.25)',
-},
-CircularTimer: {
-  width: width * 0.35,
-  height: width * 0.35,
-  borderRadius: width * 0.5,
-  borderWidth: 16,
-  borderColor: 'rgba(0, 255, 4, 0.99)',
-  marginTop: 50,
-  marginLeft: 50,
-  justifyContent: 'center',  
-  alignItems: 'center',     
-},
-TimerText:{
-  color: '#ffffff',
-  fontFamily: 'Poppins_400Regular',
-  fontSize: 20,
-  textAlign: 'center',
-},
-BottomWidgets: {
-  flex: 1,
-  flexDirection: 'row',
-},
-icon: {
-  marginTop: 35,
-  marginLeft: 20,
-},
-Vehicles3:{
-flex:1,
-  borderWidth: 2,
-  borderColor: 'rgba(21, 0, 255, 0.25)',
-  margin:5,
-},
-LeftWidget: {
-  flex: 1,
-  borderRadius: 20,
-  padding: 20,
-  borderWidth: 0.8,
-  borderColor: 'rgba(255,255,255,0.25)',
-  marginRight: 5,
-  marginLeft: 15,
-  marginBottom: 30,
-},
-QuickVehicles:{
-flex:3,
-borderWidth:0.8,
-borderColor:'#ff0000',
-},
-MoreVehicles:{
-flex:1,
-borderWidth:0.8,
-borderColor:'#ff0000',
-flexDirection:'row',
-},
-AddVehicle:{
-fontSize:18,
-marginTop:25,
-flex:1,
-},
-RightWidget: {
-  flex: 1,
-  borderRadius: 20,
-  padding: 20,
-  borderWidth: 0.8,
-  borderColor: 'rgba(255,255,255,0.25)',
-  marginLeft: 5,
-  marginRight: 15,
-  marginBottom: 30,
-},
-History: {
-flex:3,
-borderWidth:0.8,
-borderColor:'#ff0000',
-},
-Settings:{
-flex:1,
-borderWidth:0.8,
-borderColor:'#ff0000',
-flexDirection:'row',
-},
-SettingsButton:{
-    fontSize:18,
-    marginTop:35,
-}
+    color: '#8e8e93',
+    fontFamily: 'Poppins_400Regular',
+    fontSize: 13,
+  },
+  icon: {
+    marginTop: 35,
+    marginLeft: 20,
+  },
+  Settings: {
+    flexDirection: 'row',
+  },
+  SettingsButton: {
+    fontSize: 18,
+    marginTop: 35,
+    flex:1,
+  },
 });
