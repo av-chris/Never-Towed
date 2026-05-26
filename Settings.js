@@ -9,9 +9,9 @@ export default function SettingsScreen({ navigation }) {
   const [AccountOpen, setAccountOpen] = useState(false);
   const [NotificationOpen, setNotificationOpen] = useState(false);
   const [ThemeOpen, setThemeOpen] = useState(false);
-  const [theme, setTheme] = useState('system');
+  const [theme, setTheme] = useState('dark');
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
-  const [notificationTime, setNotificationTime] = useState('5 minutes before');
+  const [notificationTime, setNotificationTime] = useState('30 minutes before');
 
   if (!fontsLoaded) return null;
 
@@ -98,10 +98,11 @@ const styles = StyleSheet.create({
     marginTop: 60,
     borderWidth: 2,
     borderColor: 'rgba(255,255,255,0.15)',
-    backgroundColor: '#1c1c1e',
     margin: 20,
     borderRadius: 20,
     paddingVertical: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.02)',
+
   },
   Header: {
     justifyContent: 'center',
@@ -141,7 +142,7 @@ const styles = StyleSheet.create({
   DropdownContent: {
     paddingHorizontal: 16,
     paddingVertical: 10,
-    backgroundColor: '#2c2c2e',
+    backgroundColor: 'rgba(255, 255, 255, 0.02)',
     borderRadius: 10,
     marginHorizontal: 10,
     marginBottom: 5,

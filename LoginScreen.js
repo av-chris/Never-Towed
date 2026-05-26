@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, TouchableOpacity, TextInput, ImageBackground,ScrollView, Platform,KeyboardAvoidingView  } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, TextInput,ScrollView,KeyboardAvoidingView  } from 'react-native';
 import { useFonts, Poppins_400Regular, Poppins_700Bold } from '@expo-google-fonts/poppins';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -10,10 +10,9 @@ export default function LoginScreen({navigation}) {
 
   return (
     <LinearGradient colors={['#1a1a2e', '#0d0d0d']} style={styles.container}>
-            <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-      
 
       <StatusBar style="light" />
+      
       <View style={styles.overlay}>
         <Text style={styles.headerText}>Never Towed</Text>
         <BlurView intensity={20} tint="dark" style={styles.loginBox}>
@@ -31,17 +30,9 @@ export default function LoginScreen({navigation}) {
             <TouchableOpacity style={styles.signInButton} onPress={() => navigation.navigate('Home')}>
              <Text style={styles.signInText}>Sign In</Text>
             </TouchableOpacity>
-          <View style={styles.bottomLinks}>
-            <TouchableOpacity onPress={() => {}}>
-              <Text style={styles.linkText}>Create Account</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => {}}>
-              <Text style={styles.linkText}>Forgot Password</Text>
-            </TouchableOpacity>
-          </View>
         </BlurView>
       </View>
-      </ScrollView>
+      
     </LinearGradient>
   );
 }
@@ -101,14 +92,5 @@ const styles = StyleSheet.create({
     color: 'white',
     fontFamily: 'Poppins_700Bold',
     fontSize: 16,
-  },
-  bottomLinks: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  linkText: {
-    color: 'rgba(255,255,255,0.8)',
-    fontFamily: 'Poppins_400Regular',
-    fontSize: 13,
   },
 });

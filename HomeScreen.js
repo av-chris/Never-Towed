@@ -18,7 +18,7 @@ export default function HomeScreen({navigation}) {
 
       {/* TOP WIDGET */}
       <View style={styles.TopWidget}>
-        <TouchableOpacity style={[styles.Widgets, styles.MainWidget]}>
+        <TouchableOpacity style={styles.MainWidget}>
             <View style={styles.MainWidgetTitle}>
                 <Text style={styles.MainWidgetLabel}>Current Vehicle</Text>
             </View>
@@ -26,8 +26,7 @@ export default function HomeScreen({navigation}) {
                     <View style={styles.InfoBox}>
                         <Text style={styles.NickName}>My Car</Text>
                         <Text style={styles.CarDetail}>Toyota • Camry</Text>
-                        <Text style={styles.CarDetail}>2011 • White</Text>
-                        <Text style={styles.PlateText}>ABC1234 • TX</Text>
+
                     </View>
                     <View style={styles.CircularTimer}>
                         <Text style={styles.TimerText}>24:00</Text>
@@ -42,25 +41,25 @@ export default function HomeScreen({navigation}) {
       <View style={styles.BottomWidgets}>
 
         {/* LEFT - VEHICLES */}
-        <View style={[styles.Widgets, styles.LeftWidget]}>
+        <View style={styles.LeftWidget}>
           <Text style={styles.WidgetLabel}>Saved Vehicles</Text>
           <View style={styles.QuickVehicles}>
             <TouchableOpacity style={styles.VehicleCard}>
               <Text style={styles.VehicleNick}>Saved Vehicle NickName 1</Text>
               <Text style={styles.VehicleDetail}>Make • Model</Text>
-              <Text style={styles.VehicleDetail}>Year • PLateNumber</Text>
+
 
             </TouchableOpacity>
              <TouchableOpacity style={styles.VehicleCard}>
               <Text style={styles.VehicleNick}>Saved Vehicle NickName 2</Text>
               <Text style={styles.VehicleDetail}>Make • Model</Text>
-              <Text style={styles.VehicleDetail}>Year • PLateNumber</Text>
+
 
             </TouchableOpacity>
             <TouchableOpacity style={styles.VehicleCard}>
               <Text style={styles.VehicleNick}>Saved Vehicle NickName 3</Text>
               <Text style={styles.VehicleDetail}>Make • Model</Text>
-              <Text style={styles.VehicleDetail}>Year • PLateNumber</Text>
+
 
             </TouchableOpacity>
           </View>
@@ -71,25 +70,19 @@ export default function HomeScreen({navigation}) {
         </View>
 
         {/* RIGHT - HISTORY */}
-        <View style={[styles.Widgets, styles.RightWidget]}>
+        <View style={styles.RightWidget}>
           <Text style={styles.WidgetLabel}>History</Text>
           <View style={styles.History}>
             <View style={styles.VehicleCard}>
               <Text style={styles.VehicleNick}>Vehicle NickName 1</Text>
-                <Text style={styles.VehicleDetail}>Make • Model</Text>
-              <Text style={styles.VehicleDetail}>Year • PLateNumber</Text>
               <Text style={styles.VehicleDetail}>Month Day • 24hrs</Text>
             </View>
             <View style={styles.VehicleCard}>
               <Text style={styles.VehicleNick}>Vehicle NickName 2</Text>
-                <Text style={styles.VehicleDetail}>Make • Model</Text>
-              <Text style={styles.VehicleDetail}>Year • PLateNumber</Text>
               <Text style={styles.VehicleDetail}>Month Day • 24hrs</Text>
             </View>
             <View style={styles.VehicleCard}>
               <Text style={styles.VehicleNick}>Vehicle NickName 3</Text>
-                <Text style={styles.VehicleDetail}>Make • Model</Text>
-              <Text style={styles.VehicleDetail}>Year • PLateNumber</Text>
               <Text style={styles.VehicleDetail}>Month Day • 24hrs</Text>
             </View>
           </View>
@@ -119,7 +112,8 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 20,
     borderWidth: 0.8,
-    borderColor: 'rgba(255,255,255,0.15)',
+    backgroundColor: 'rgba(255, 255, 255, 0.02)',
+    borderColor: 'rgba(255,255,255,0.3)',
     marginTop: 70,
     marginBottom: 14,
     marginHorizontal: 15,
@@ -137,23 +131,17 @@ const styles = StyleSheet.create({
     paddingLeft: 8,
   },
   NickName: {
-    color: '#ffffff',
+    color: '#e4e4e4',
     fontFamily: 'Poppins_700Bold',
     fontSize: 22,
     marginTop:22,
     marginBottom: 26,
   },
   CarDetail: {
-    color: '#8e8e93',
+    color: '#cbcbcb',
     fontFamily: 'Poppins_400Regular',
     fontSize: 18,
     marginBottom: 26,
-  },
-  PlateText: {
-    color: '#8e8e93',
-    fontFamily: 'Poppins_400Regular',
-    fontSize: 18,
-    marginTop: 0,
   },
   CircularTimer: {
     marginTop:60,
@@ -193,16 +181,13 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins_700Bold',
     fontSize: 13,
   },
-
-  Widgets: {
-    backgroundColor: '#1c1c1e',
-  },
   LeftWidget: {
     flex: 1,
     borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.02)',
     padding: 14,
     borderWidth: 0.8,
-    borderColor: 'rgba(255,255,255,0.15)',
+    borderColor: 'rgba(255,255,255,0.3)',
     marginRight: 5,
     marginLeft: 15,
     marginBottom: 30,
@@ -212,7 +197,8 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 14,
     borderWidth: 0.8,
-    borderColor: 'rgba(255,255,255,0.15)',
+    backgroundColor: 'rgba(255, 255, 255, 0.02)',
+    borderColor: 'rgba(255,255,255,0.3)',
     marginLeft: 5,
     marginRight: 15,
     marginBottom: 30,
@@ -225,18 +211,18 @@ const styles = StyleSheet.create({
   },
   VehicleCard: {
     flex:1,
-    backgroundColor: '#2c2c2e',
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
     borderRadius: 10,
     padding: 8,
     marginBottom: 6,
   },
   VehicleNick: {
-    color: '#ffffff',
+    color: '#ffffffbf',
     fontFamily: 'Poppins_700Bold',
     fontSize: 12,
   },
   VehicleDetail: {
-    color: '#8e8e93',
+    color: '#cbcbcbca',
     fontFamily: 'Poppins_400Regular',
     fontSize: 13,
   },
@@ -252,17 +238,5 @@ const styles = StyleSheet.create({
     color: '#8e8e93',
     fontFamily: 'Poppins_400Regular',
     fontSize: 13,
-  },
-  icon: {
-    marginTop: 35,
-    marginLeft: 20,
-  },
-  Settings: {
-    flexDirection: 'row',
-  },
-  SettingsButton: {
-    fontSize: 18,
-    marginTop: 35,
-    flex:1,
   },
 });
