@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, TouchableOpacity, TextInput, ImageBackground } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, TextInput, ImageBackground,ScrollView, Platform,KeyboardAvoidingView  } from 'react-native';
 import { useFonts, Poppins_400Regular, Poppins_700Bold } from '@expo-google-fonts/poppins';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -10,7 +10,9 @@ export default function LoginScreen({navigation}) {
 
   return (
     <LinearGradient colors={['#1a1a2e', '#0d0d0d']} style={styles.container}>
+            <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
       
+
       <StatusBar style="light" />
       <View style={styles.overlay}>
         <Text style={styles.headerText}>Never Towed</Text>
@@ -39,6 +41,7 @@ export default function LoginScreen({navigation}) {
           </View>
         </BlurView>
       </View>
+      </ScrollView>
     </LinearGradient>
   );
 }

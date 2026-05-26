@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity,ScrollView } from 'react-native';
 import { useFonts, Poppins_400Regular, Poppins_700Bold } from '@expo-google-fonts/poppins';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -17,6 +17,8 @@ export default function SettingsScreen({ navigation }) {
 
   return (
     <LinearGradient colors={['#1a1a2e', '#0d0d0d']} style={styles.container}>
+        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+    
       <View style={styles.MainScreen}>
         <View style={styles.Header}>
           <TouchableOpacity style={styles.BackButton} onPress={() => navigation.goBack()}>
@@ -83,6 +85,7 @@ export default function SettingsScreen({ navigation }) {
 
         </View>
       </View>
+      </ScrollView>
     </LinearGradient>
   );
 }

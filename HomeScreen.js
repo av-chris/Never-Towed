@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, TouchableOpacity, Dimensions } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Dimensions,ScrollView } from 'react-native';
 import { useFonts, Poppins_400Regular, Poppins_700Bold } from '@expo-google-fonts/poppins';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -12,6 +12,8 @@ export default function HomeScreen({navigation}) {
 
   return (
     <LinearGradient colors={['#1a1a2e', '#0d0d0d']} style={styles.container}>
+        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+
       <StatusBar style="light" />
 
       {/* TOP WIDGET */}
@@ -98,6 +100,7 @@ export default function HomeScreen({navigation}) {
         </View>
 
       </View>
+      </ScrollView>
     </LinearGradient>
   );
 }
@@ -108,7 +111,7 @@ const styles = StyleSheet.create({
   },
   // TOP WIDGET
   TopWidget: {
-    flex: 0.75,
+    flex: 0.25,
   },
 
   MainWidget: {
@@ -124,7 +127,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
     MainWidgetTitle:{
-    flex:.5,
+    flex:.1,
   },
   MainWidgetInfo:{
     flexDirection:'row'
