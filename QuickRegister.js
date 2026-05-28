@@ -4,10 +4,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 
-export default function AddVehicle({ navigation }) {
+export default function QuickRegister({ route, navigation }) {
   const [fontsLoaded] = useFonts({ Poppins_400Regular, Poppins_700Bold });
-
-  const states = [
+    const states = [
   'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California',
   'Colorado', 'Connecticut', 'Delaware', 'Florida', 'Georgia',
   'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa',
@@ -21,13 +20,14 @@ export default function AddVehicle({ navigation }) {
   ];
 const [stateSearch, setStateSearch] = useState('');
 const [saveOpen, setSaveOpen] = useState(false)
-const [save, setSave] = useState('Save and Register');
+const [save, setSave] = useState('Register');
 
 const filteredStates = states.filter(state =>
   state.toLowerCase().startsWith(stateSearch.toLowerCase())
 );
   const [statePickerOpen, setStatePickerOpen] = useState(false);
   const [selectedState, setSelectedState] = useState('');
+
 
   if (!fontsLoaded) return null;
 
@@ -38,16 +38,13 @@ const filteredStates = states.filter(state =>
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-          <View style={styles.MainScreen}>
-
-            <View style={styles.Header}>
-              <TouchableOpacity style={styles.BackButton} onPress={() => navigation.goBack()}>
-                <Ionicons name="chevron-back" size={28} color="#ffffff" />
-              </TouchableOpacity>
-              <Text style={styles.HeaderText}>Add Vehicle</Text>   
-            </View>
-
-
+      <View style={styles.MainScreen}>
+        <View style={styles.Header}>
+          <TouchableOpacity style={styles.BackButton} onPress={() => navigation.goBack()}>
+            <Ionicons name="chevron-back" size={28} color="#ffffff" />
+          </TouchableOpacity>
+          <Text style={styles.HeaderText}>Quick Register</Text>
+        </View>
 
             <View style={styles.MainContent}>
 
@@ -133,7 +130,7 @@ const filteredStates = states.filter(state =>
               />
 
             {/* Save Vehicle */}
-<View style={[styles.SubmitButtonWrapper, saveOpen && styles.SubmitButtonWrapperOpen]}>
+<View style={[save === 'Delete' ? styles.Delete : styles.SubmitButtonWrapper , saveOpen && styles.SubmitButtonWrapperOpen]}>
   <TouchableOpacity style={styles.SubmitButtonInner} onPress={() => setSaveOpen(!saveOpen)}>
 <Text style={styles.buttonText}>{save}</Text>
     <Ionicons name={saveOpen ? 'chevron-down' : 'chevron-forward'} size={20} color="rgba(255,255,255,0.6)" />
@@ -141,7 +138,7 @@ const filteredStates = states.filter(state =>
 
   {saveOpen && (
     <View style={styles.DropdownContent}>
-      {['Save and Register', 'Only Save', ' Only Register'].map((option) => (
+      {['Register' , 'Edit', 'Delete'].map((option) => (
         <TouchableOpacity key={option} style={styles.CheckboxRow} onPress={() => {setSave(option);setSaveOpen(false);}}>
           <Ionicons name={save === option ? 'radio-button-on' : 'radio-button-off'} size={22} color="rgba(255,255,255,0.6)" />
           <Text style={styles.DropdownText}>{option.charAt(0).toUpperCase() + option.slice(1)}</Text>
@@ -153,8 +150,8 @@ const filteredStates = states.filter(state =>
 
 
             {/* Submit */}
-            <TouchableOpacity style={styles.SubmitButton}  onPress={() => navigation.goBack()}>
-              <Text style={styles.buttonText}>Submit</Text>
+            <TouchableOpacity style={ save === 'Delete' ? styles.SubmitButtonDelete : styles.SubmitButton} onPress={() => navigation.goBack()}>
+              <Text style={styles.buttonText}>Confirm</Text>
             </TouchableOpacity>
 
             </View>
@@ -165,6 +162,10 @@ const filteredStates = states.filter(state =>
   );
 }
 
+
+        
+
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -173,7 +174,7 @@ const styles = StyleSheet.create({
     marginTop: 60,
     borderWidth: 2,
     borderColor: 'rgba(255,255,255,0.15)',
-    backgroundColor: 'rgba(255, 255, 255, 0.02)',
+    backgroundColor: 'rgba(255,255,255,0.02)',
     margin: 20,
     borderRadius: 20,
     paddingVertical: 10,
@@ -193,7 +194,7 @@ const styles = StyleSheet.create({
   },
   HeaderText: {
     color: '#ffffff',
-    fontSize: 40,
+    fontSize: 30,
     fontFamily: 'Poppins_400Regular',
   },
   MainContent: {
@@ -316,5 +317,25 @@ DropdownContent: {
   paddingVertical: 10,
   borderTopWidth: 0.5,
   borderTopColor: 'rgba(255,255,255,0.1)',
+},
+Delete:{
+  backgroundColor: 'rgba(188, 0, 0, 0.2)',
+  borderRadius: 40,
+  borderWidth: 0.5,
+  borderColor: 'rgba(209, 0, 0, 0.7)',
+  marginBottom: 16,
+  overflow: 'hidden',
+},
+SubmitButtonDelete:{
+    color: 'rgba(255,255,255,0.6)',
+  backgroundColor: 'rgba(188, 0, 0, 0.2)',
+    paddingVertical: 14,
+    borderRadius: 40,
+    marginHorizontal:110,
+    marginBottom: 16,
+    borderWidth: 0.5,
+  borderColor: 'rgba(209, 0, 0, 0.7)',
+    alignItems: 'center',
+    justifyContent:'center',
 },
 });

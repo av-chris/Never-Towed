@@ -18,14 +18,14 @@ export default function HomeScreen({navigation}) {
 
       {/* TOP WIDGET */}
       <View style={styles.TopWidget}>
-        <TouchableOpacity style={styles.MainWidget}>
+        <TouchableOpacity style={styles.MainWidget} onPress={() => navigation.navigate('VehicleDetail')}>
             <View style={styles.MainWidgetTitle}>
                 <Text style={styles.MainWidgetLabel}>Current Vehicle</Text>
             </View>
                 <View style={styles.MainWidgetInfo}>
                     <View style={styles.InfoBox}>
                         <Text style={styles.NickName}>My Car</Text>
-                        <Text style={styles.CarDetail}>Toyota • Camry</Text>
+                        <Text style={styles.CarDetail}>Lexus • LS400</Text>
 
                     </View>
                     <View style={styles.CircularTimer}>
@@ -44,19 +44,20 @@ export default function HomeScreen({navigation}) {
         <View style={styles.LeftWidget}>
           <Text style={styles.WidgetLabel}>Saved Vehicles</Text>
           <View style={styles.QuickVehicles}>
-            <TouchableOpacity style={styles.VehicleCard}>
+
+            <TouchableOpacity style={styles.VehicleCard} onPress={() => navigation.navigate('QuickRegister')}>
               <Text style={styles.VehicleNick}>Saved Vehicle NickName 1</Text>
               <Text style={styles.VehicleDetail}>Make • Model</Text>
 
 
             </TouchableOpacity>
-             <TouchableOpacity style={styles.VehicleCard}>
+            <TouchableOpacity style={styles.VehicleCard} onPress={() => navigation.navigate('QuickRegister')}>
               <Text style={styles.VehicleNick}>Saved Vehicle NickName 2</Text>
               <Text style={styles.VehicleDetail}>Make • Model</Text>
 
 
             </TouchableOpacity>
-            <TouchableOpacity style={styles.VehicleCard}>
+            <TouchableOpacity style={styles.VehicleCard} onPress={() => navigation.navigate('QuickRegister')}>
               <Text style={styles.VehicleNick}>Saved Vehicle NickName 3</Text>
               <Text style={styles.VehicleDetail}>Make • Model</Text>
 
@@ -73,18 +74,22 @@ export default function HomeScreen({navigation}) {
         <View style={styles.RightWidget}>
           <Text style={styles.WidgetLabel}>History</Text>
           <View style={styles.History}>
-            <View style={styles.VehicleCard}>
+
+            <TouchableOpacity style={styles.VehicleCard} onPress={() => navigation.navigate('History')}>
               <Text style={styles.VehicleNick}>Vehicle NickName 1</Text>
               <Text style={styles.VehicleDetail}>Month Day • 24hrs</Text>
-            </View>
-            <View style={styles.VehicleCard}>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.VehicleCard} onPress={() => navigation.navigate('History')}>
               <Text style={styles.VehicleNick}>Vehicle NickName 2</Text>
               <Text style={styles.VehicleDetail}>Month Day • 24hrs</Text>
-            </View>
-            <View style={styles.VehicleCard}>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.VehicleCard} onPress={() => navigation.navigate('History')}>
               <Text style={styles.VehicleNick}>Vehicle NickName 3</Text>
               <Text style={styles.VehicleDetail}>Month Day • 24hrs</Text>
-            </View>
+            </TouchableOpacity>
+
           </View>
           <TouchableOpacity style={styles.MoreVehicles} onPress={() => navigation.navigate('Settings')}>
             <Ionicons name="settings-outline" size={22} color="#8e8e93" />
