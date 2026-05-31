@@ -1,11 +1,49 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, TouchableOpacity, TextInput,ScrollView,KeyboardAvoidingView  } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, TextInput,ScrollView,KeyboardAvoidingView, Alert  } from 'react-native';
 import { useFonts, Poppins_400Regular, Poppins_700Bold } from '@expo-google-fonts/poppins';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useState } from 'react';
+import { BASE_URL } from './config';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 export default function LoginScreen({navigation}) {
   const [fontsLoaded] = useFonts({ Poppins_400Regular, Poppins_700Bold });
+  const [Email, setEmail] = useState('')
+  const [Password, setPassword] = useState('')
+
+  const handleAuthLogic = async () =>{
+
+try {
+  const response = await fetch(BASE_URL +'/login', {
+    method:'POST',
+    headers: {
+      'Content-Type': 'application/json'
+      },
+       body: JSON.stringify({
+        email:Email,
+        password:Password
+      })
+  })
+
+   const data = await response.json()
+
+   if (data.token){
+    await AsyncStorage.setItem('token', data.token)
+    navigation.navigate('Home')
+   }
+   else   Alert.alert('Error', data.message)
+
+
+
+} catch (error) {
+  console.log(error)
+  Alert.alert('error', 'something went wrong')
+}
+
+  }
+
   if (!fontsLoaded) return null;
 
   return (
@@ -17,17 +55,21 @@ export default function LoginScreen({navigation}) {
         <Text style={styles.headerText}>Never Towed</Text>
         <BlurView intensity={20} tint="dark" style={styles.loginBox}>
           <TextInput
+          value={Email}
             style={styles.input}
             placeholder="Username"
             placeholderTextColor="rgba(255,255,255,0.6)"
+            onChangeText={(text) => setEmail( text)}
           />
           <TextInput
+          value={Password}
             style={styles.input}
             placeholder="Password"
             placeholderTextColor="rgba(255,255,255,0.6)"
             secureTextEntry
+            onChangeText={setPassword}
           />
-            <TouchableOpacity style={styles.signInButton} onPress={() => navigation.navigate('Home')}>
+            <TouchableOpacity style={styles.signInButton} onPress={() => handleAuthLogic()}>
              <Text style={styles.signInText}>Sign In</Text>
             </TouchableOpacity>
         </BlurView>
