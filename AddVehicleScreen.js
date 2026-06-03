@@ -1,8 +1,9 @@
-import { StyleSheet, Text, View, TouchableOpacity, TextInput, Modal, FlatList, KeyboardAvoidingView, ScrollView, Platform } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, TextInput, Modal, FlatList, KeyboardAvoidingView, ScrollView, Platform, Alert } from 'react-native';
 import { useFonts, Poppins_400Regular, Poppins_700Bold } from '@expo-google-fonts/poppins';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
+import { useSQLiteContext } from 'expo-sqlite';
 
 export default function AddVehicle({ navigation }) {
   const [fontsLoaded] = useFonts({ Poppins_400Regular, Poppins_700Bold });
@@ -28,6 +29,46 @@ const filteredStates = states.filter(state =>
 );
   const [statePickerOpen, setStatePickerOpen] = useState(false);
   const [selectedState, setSelectedState] = useState('');
+
+const db = useSQLiteContext();
+const [form, setform] = useState({
+nickname: '',
+licence_plate: '',
+licence_state: '',
+make: '',
+model: '',
+color: '',
+})
+const handleSubmit = async () =>{
+try{
+  if(!form.nickname||!form.licence_plate||!form.licence_state||!form.make||!form.model||!form.color)
+    throw new Error ('All fields are required');
+
+  await db.runAsync(
+    'INSERT INTO vehicles(nickname, licence_plate, licence_state, make, model, color) VALUES (?,?,?,?,?,?)',
+    [form.nickname, form.licence_plate, form.licence_state, form.make, form.model, form.color]
+  );
+
+  Alert.alert('Success', 'Vehicle added successfully!')
+  setform({
+nickname: '',
+licence_plate: '',
+licence_state: '',
+make: '',
+model: '',
+color: '',
+  })
+  
+const result = await db.getAllAsync('SELECT * FROM vehicles')
+console.log('vehicles in db:', result)
+
+  }catch(error){
+    console.error(error);
+    Alert.alert('Error', 'An error occured while adding the vehicle')
+  }
+  }
+
+
 
   if (!fontsLoaded) return null;
 
@@ -56,6 +97,8 @@ const filteredStates = states.filter(state =>
                 style={styles.input}
                 placeholder="NickName - Optional"
                 placeholderTextColor="rgba(255,255,255,0.6)"
+                value={form.nickname}
+                onChangeText={(text) => setform({...form, nickname: text})}
               />
 
               {/* License Plate */}
@@ -63,6 +106,8 @@ const filteredStates = states.filter(state =>
                 style={styles.input}
                 placeholder="License Plate"
                 placeholderTextColor="rgba(255,255,255,0.6)"
+                value={form.licence_plate}
+                onChangeText={(text) => setform({...form, licence_plate: text})}
               />
 
               {/* State */}
@@ -99,9 +144,10 @@ const filteredStates = states.filter(state =>
           <TouchableOpacity
             style={styles.stateOption}
             onPress={() => {
-              setSelectedState(item);
-              setStatePickerOpen(false);
-              setStateSearch('');
+              setSelectedState(item)
+              setform({...form, licence_state: item})
+              setStatePickerOpen(false)
+              setStateSearch('')
             }}
           >
             <Text style={styles.stateText}>{item}</Text>
@@ -116,6 +162,8 @@ const filteredStates = states.filter(state =>
                 style={styles.input}
                 placeholder="Make"
                 placeholderTextColor="rgba(255,255,255,0.6)"
+                value={form.make}
+                onChangeText={(text) => setform({...form, make: text})}
               />
 
               {/* Model */}
@@ -123,6 +171,8 @@ const filteredStates = states.filter(state =>
                 style={styles.input}
                 placeholder="Model"
                 placeholderTextColor="rgba(255,255,255,0.6)"
+                value={form.model}
+                onChangeText={(text) => setform({...form, model: text})}
               />
 
               {/* Color */}
@@ -130,6 +180,8 @@ const filteredStates = states.filter(state =>
                 style={styles.input}
                 placeholder="Color"
                 placeholderTextColor="rgba(255,255,255,0.6)"
+                value={form.color}
+                onChangeText={(text) => setform({...form, color: text})}
               />
 
             {/* Save Vehicle */}
@@ -153,7 +205,7 @@ const filteredStates = states.filter(state =>
 
 
             {/* Submit */}
-            <TouchableOpacity style={styles.SubmitButton}  onPress={() => navigation.goBack()}>
+            <TouchableOpacity style={styles.SubmitButton}  onPress={() => handleSubmit()}>
               <Text style={styles.buttonText}>Submit</Text>
             </TouchableOpacity>
 
