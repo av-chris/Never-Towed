@@ -7,10 +7,38 @@ import SettingsScreen from './Settings';
 import HistoryDetail from './HistoryDetails';
 import QuickRegister from './QuickRegister';
 import VehicleDetail from './VehicleDetails';
+import { SQLiteProvider } from 'expo-sqlite';
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
+<SQLiteProvider 
+    databaseName = "nevertowed.db"
+    onInit={async (db) =>{
+        await db.execAsync(`
+        CREATE TABLE IF NOT EXISTS vehicles(
+        
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nickname TEXT,
+        licence_plate TEXT,
+        licence_state TEXT,
+        make TEXT,
+        model TEXT,
+        color TEXT
+        );
+            CREATE TABLE IF NOT EXISTS permits (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        licence_plate TEXT,
+        licence_state TEXT,
+        make TEXT,
+        model TEXT,
+        color TEXT,
+        issue_date TEXT,
+        expiration_date TEXT,
+        is_active INTEGER
+        );
+         `)
+    }} useSuspense={false}>
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false,contentStyle: { backgroundColor: '#0d0d0d' }}}>
         <Stack.Screen name="Login" component={LoginScreen} />
@@ -21,7 +49,7 @@ export default function App() {
         <Stack.Screen name="VehicleDetail" component={VehicleDetail} />
         <Stack.Screen name="QuickRegister" component={QuickRegister} />
       </Stack.Navigator>
-      
     </NavigationContainer>
+  </SQLiteProvider>
   );
 }
