@@ -3,14 +3,32 @@ import { StyleSheet, Text, View, TouchableOpacity, Dimensions,ScrollView } from 
 import { useFonts, Poppins_400Regular, Poppins_700Bold } from '@expo-google-fonts/poppins';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useSQLiteContext } from 'expo-sqlite';
+import { useState, useCallback} from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+
 
 const { width, height } = Dimensions.get('window');
 
 export default function HomeScreen({navigation}) {
+  
+  const db = useSQLiteContext()
+  const [vehicles, setVehicles] = useState([]);
+  useFocusEffect(
+     useCallback(() => {
+         const loadVehicles = async () => {
+             const result = await db.getAllAsync('SELECT * FROM vehicles')
+             setVehicles(result)
+         }
+         loadVehicles()
+     }, [])
+)
   const [fontsLoaded] = useFonts({ Poppins_400Regular, Poppins_700Bold });
+
   if (!fontsLoaded) return null;
 
   return (
+    
     <LinearGradient colors={['#1a1a2e', '#0d0d0d']} style={styles.container}>
         <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
 
@@ -43,27 +61,18 @@ export default function HomeScreen({navigation}) {
         {/* LEFT - VEHICLES */}
         <View style={styles.LeftWidget}>
           <Text style={styles.WidgetLabel}>Saved Vehicles</Text>
-          <View style={styles.QuickVehicles}>
-
-            <TouchableOpacity style={styles.VehicleCard} onPress={() => navigation.navigate('QuickRegister')}>
-              <Text style={styles.VehicleNick}>Saved Vehicle NickName 1</Text>
-              <Text style={styles.VehicleDetail}>Make • Model</Text>
-
-
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.VehicleCard} onPress={() => navigation.navigate('QuickRegister')}>
-              <Text style={styles.VehicleNick}>Saved Vehicle NickName 2</Text>
-              <Text style={styles.VehicleDetail}>Make • Model</Text>
-
-
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.VehicleCard} onPress={() => navigation.navigate('QuickRegister')}>
-              <Text style={styles.VehicleNick}>Saved Vehicle NickName 3</Text>
-              <Text style={styles.VehicleDetail}>Make • Model</Text>
-
-
-            </TouchableOpacity>
-          </View>
+<ScrollView style={styles.QuickVehicles} showsVerticalScrollIndicator={false}>
+    {vehicles.map((vehicle) => (
+        <TouchableOpacity 
+            key={vehicle.id} 
+            style={styles.VehicleCard} 
+            onPress={() => navigation.navigate('QuickRegister')}
+        >
+            <Text style={styles.VehicleNick}>{vehicle.nickname || vehicle.licence_plate}</Text>
+            <Text style={styles.VehicleDetail}>{vehicle.make} • {vehicle.model}</Text>
+        </TouchableOpacity>
+    ))}
+</ScrollView>
           <TouchableOpacity style={styles.MoreVehicles } onPress={() => navigation.navigate('AddVehicle')}>
             <Ionicons name="add-circle" size={22} color="#8e8e93" />
             <Text style={styles.AddVehicle}>Add Vehicle</Text>
@@ -111,7 +120,10 @@ const styles = StyleSheet.create({
   TopWidget: {
     flex: 0.25,
   },
-
+ BottomWidgets: {
+    flex: 1,
+    flexDirection: 'row',
+  },
   MainWidget: {
     flex: 1,
     borderRadius: 20,
@@ -171,10 +183,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   // BOTTOM WIDGETS
-  BottomWidgets: {
-    flex: 1,
-    flexDirection: 'row',
-  },
+ 
   WidgetLabel: {
     color: '#ffffff',
     fontFamily: 'Poppins_700Bold',
@@ -196,8 +205,9 @@ const styles = StyleSheet.create({
     marginRight: 5,
     marginLeft: 15,
     marginBottom: 30,
+    
   },
-  RightWidget: {
+RightWidget: {
     flex: 1,
     borderRadius: 20,
     padding: 14,
@@ -207,20 +217,22 @@ const styles = StyleSheet.create({
     marginLeft: 5,
     marginRight: 15,
     marginBottom: 30,
-  },
-  QuickVehicles: {
+    maxHeight: 280,  // add this
+},
+QuickVehicles: {
+    maxHeight: 365,
     flex: 1,
-  },
+},
+
   History: {
     flex: 1,
   },
   VehicleCard: {
-    flex:1,
     backgroundColor: 'rgba(255, 255, 255, 0.04)',
     borderRadius: 10,
     padding: 8,
     marginBottom: 6,
-  },
+},
   VehicleNick: {
     color: '#ffffffbf',
     fontFamily: 'Poppins_700Bold',

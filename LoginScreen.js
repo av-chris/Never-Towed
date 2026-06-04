@@ -69,7 +69,7 @@ try {
             secureTextEntry
             onChangeText={setPassword}
           />
-            <TouchableOpacity style={styles.signInButton} onPress={() => handleAuthLogic()}>
+            <TouchableOpacity style={styles.signInButton} onPress={() => navigation.navigate('Home')}>
              <Text style={styles.signInText}>Sign In</Text>
             </TouchableOpacity>
         </BlurView>
