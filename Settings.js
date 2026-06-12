@@ -1,18 +1,55 @@
-import { StyleSheet, Text, View, TouchableOpacity,ScrollView } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity,ScrollView,Alert } from 'react-native';
 import { useFonts, Poppins_400Regular, Poppins_700Bold } from '@expo-google-fonts/poppins';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
+import { useSQLiteContext } from 'expo-sqlite';
 
 export default function SettingsScreen({ navigation }) {
   const [fontsLoaded] = useFonts({ Poppins_400Regular, Poppins_700Bold });
   const [AccountOpen, setAccountOpen] = useState(false);
   const [NotificationOpen, setNotificationOpen] = useState(false);
-  const [ThemeOpen, setThemeOpen] = useState(false);
-  const [theme, setTheme] = useState('dark');
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [notificationTime, setNotificationTime] = useState('30 minutes before');
+  const [ThemeOpen, setThemeOpen] = useState(false);
+  const [theme, setTheme] = useState('Dark');
+  const [DataOpen, setDataOpen] = useState(false);
+  const [data, setData] = useState('')
 
+  const db = useSQLiteContext();
+
+
+  const handleData = async() =>{
+
+async function DeleteSaved(){
+await db.runAsync('DELETE FROM vehicles')
+  const SavedResult = await db.getAllAsync('Select * FROM vehicles')
+console.log('VEHICLES IN DATABASE:',SavedResult)
+}
+async function DeleteHistory(){
+await db.runAsync('DELETE FROM permits')
+  const PermitResult = await db.getAllAsync('SELECT * FROM permits');
+  console.log('PERMITS IN DATABASE:',PermitResult)
+
+}
+
+if(data === 'Delete all Saved Vehicles'){
+DeleteSaved();
+  Alert.alert('Success', 'All Saved Vehicle Data deleted successfully!');
+}
+else if(data === 'Delete all Permit History'){
+DeleteHistory();
+  Alert.alert('Success', 'All Vehicle Permit History deleted successfully!');
+}
+else if(data === 'Delete all Local Data'){
+DeleteSaved();
+DeleteHistory();
+  Alert.alert('Success', 'All Local History deleted successfully!');
+}
+
+  }
+
+  
   if (!fontsLoaded) return null;
 
   return (
@@ -69,14 +106,34 @@ export default function SettingsScreen({ navigation }) {
           </TouchableOpacity>
           {ThemeOpen && (
             <View style={styles.DropdownContent}>
-              {['dark', 'light', 'system'].map((option) => (
+              {['Dark', 'Light', 'System Settings'].map((option) => (
                 <TouchableOpacity key={option} style={styles.CheckboxRow} onPress={() => setTheme(option)}>
                   <Ionicons name={theme === option ? 'radio-button-on' : 'radio-button-off'} size={22} color="#ffffff" />
-                  <Text style={styles.DropdownText}>{option === 'system' ? 'System Settings' : option.charAt(0).toUpperCase() + option.slice(1)}</Text>
+                  <Text style={styles.DropdownText}>{option}</Text>
                 </TouchableOpacity>
               ))}
             </View>
           )}
+            {/* Local Data */}
+          <TouchableOpacity style={styles.ContentTab} onPress={() => setDataOpen(!DataOpen)}>
+            <Text style={styles.ContentText}>Local Data</Text>
+            <Ionicons name={DataOpen ? 'chevron-down' : 'chevron-forward'} size={20} color="#ffffff" />
+          </TouchableOpacity>
+          {DataOpen && (
+            <View style={styles.DropdownContent}>
+            {['Delete all Saved Vehicles','Delete all Permit History','Delete all Local Data'].map((DataOption) => (
+                <TouchableOpacity key={DataOption} style={styles.CheckboxRow} onPress={() => setData(DataOption)}>
+                  <Ionicons name={data === DataOption ? 'radio-button-on' : 'radio-button-off'} size={22} color="#ffa49f" />
+                  <Text style={styles.DataText}>{DataOption}</Text>
+                </TouchableOpacity>
+            ))}
+              <TouchableOpacity style={[styles.ContentTab, styles.LogOut]} onPress={() => handleData()}>
+              <Text style={styles.LogOutText}>Confirm</Text>
+              </TouchableOpacity>
+
+            </View>
+          )}
+
 
           {/* Log Out */}
           <TouchableOpacity style={[styles.ContentTab, styles.LogOut]} onPress={() => navigation.reset({ index: 0, routes: [{ name: 'Login' }] })}>
@@ -173,6 +230,11 @@ const styles = StyleSheet.create({
   },
   LogOutText: {
     color: '#ff453a',
+    fontSize: 18,
+    fontFamily: 'Poppins_400Regular',
+  },
+  DataText: {
+    color: '#ffa49f',
     fontSize: 18,
     fontFamily: 'Poppins_400Regular',
   },
