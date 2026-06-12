@@ -1,11 +1,22 @@
-import { StyleSheet, Text, View, TouchableOpacity, TextInput, Modal, FlatList, KeyboardAvoidingView, ScrollView, Platform } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, TextInput, Modal, FlatList, KeyboardAvoidingView, ScrollView, Platform, Alert } from 'react-native';
 import { useFonts, Poppins_400Regular, Poppins_700Bold } from '@expo-google-fonts/poppins';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useState, useCallback} from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import { useSQLiteContext } from 'expo-sqlite';
+import { BASE_URL } from './config';
 
-export default function QuickRegister({ route, navigation }) {
-  const [fontsLoaded] = useFonts({ Poppins_400Regular, Poppins_700Bold });
+
+export default function QuickRegister({ navigation, route }) {
+    const [fontsLoaded] = useFonts({ Poppins_400Regular, Poppins_700Bold });
+
+  // Access the SQLite database provided by SQLiteProvider in App.js
+  const db = useSQLiteContext();
+  // Vehicle passed from HomeScreen
+  const vehicle = route.params.vehicle
+
+  // State picker
     const states = [
   'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California',
   'Colorado', 'Connecticut', 'Delaware', 'Florida', 'Georgia',
@@ -19,15 +30,83 @@ export default function QuickRegister({ route, navigation }) {
   'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming',
   ];
 const [stateSearch, setStateSearch] = useState('');
+const filteredStates = states.filter(state =>state.toLowerCase().startsWith(stateSearch.toLowerCase()));
+const [statePickerOpen, setStatePickerOpen] = useState(false);
+const [selectedState, setSelectedState] = useState(vehicle?.licence_state || '');
+// Action dropdown — Register / Edit / Delete
 const [saveOpen, setSaveOpen] = useState(false)
 const [save, setSave] = useState('Register');
 
-const filteredStates = states.filter(state =>
-  state.toLowerCase().startsWith(stateSearch.toLowerCase())
-);
-  const [statePickerOpen, setStatePickerOpen] = useState(false);
-  const [selectedState, setSelectedState] = useState('');
+  // Controlled form state for all vehicle input fields
+  const [form, setform] = useState({
+    nickname:vehicle?.nickname || '',
+    licence_plate:vehicle?.licence_plate || '',
+    licence_state:vehicle?.licence_state || '',
+    make:vehicle?.make || '',
+    model:vehicle?.model || '',
+    color: vehicle?.color || '',
+  });
 
+// Handles Register, Edit, and Delete based on selected mode
+const handleSubmit = async() => {
+
+async function Register(){
+const response = await fetch(BASE_URL + '/RegisterVehicle', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          licence_plate: vehicle.licence_plate,
+          licence_state: vehicle.licence_state,
+          make: vehicle.make,
+          model: vehicle.model,
+          color: vehicle.color
+        })
+      });
+
+      // Parse the permit object returned by the server
+      const data = await response.json();
+
+      // Insert the permit into local history — is_active stored as 1 (true) or 0 (false)
+      await db.runAsync(
+        'INSERT INTO permits(licence_plate, licence_state, make, model, color, issue_date, expiration_date, is_active) VALUES (?,?,?,?,?,?,?,?)',
+        [data.licence_plate, data.licence_state, data.make, data.model, data.color, data.issue_date, data.expiration_date, data.is_active ? 1 : 0]
+      );
+      const result = await db.getAllAsync('SELECT * FROM permits');
+      console.log('permits in db:', result);
+};
+async function Delete(){
+await db.runAsync('DELETE FROM vehicles WHERE id = ?', [vehicle.id])
+};
+async function Edit(){
+await db.runAsync('UPDATE vehicles SET nickname = ?, licence_plate = ?, licence_state = ?, make = ?, model = ?, color = ? WHERE id = ?',[form.nickname,form.licence_plate,form.licence_state,form.make,form.model,form.color,vehicle.id])
+  const result = await db.getAllAsync('SELECT * FROM vehicles WHERE id= ?',(vehicle.id));
+  console.log('VEHICLE IN DATABASE:',result)
+}
+try{
+if(save === 'Register'){ 
+  await Register();
+  Alert.alert('Success', 'Vehicle registered successfully!');
+  navigation.goBack()
+};
+if(save === 'Delete'){
+  await Delete()
+  Alert.alert('Success', 'Vehicle deleted successfully!')
+  navigation.goBack()
+
+};
+if(save === 'Edit'){
+  await Edit()
+
+  Alert.alert('Success', 'Vehicle Edited successfully!')
+}
+}
+catch(error){
+  console.error(error);
+  Alert.alert('Error', 'An error occurred');
+};
+}
 
   if (!fontsLoaded) return null;
 
@@ -51,6 +130,9 @@ const filteredStates = states.filter(state =>
               {/* Nick Name */}
               <TextInput
                 style={styles.input}
+                editable ={save ==='Edit'}
+                value={form.nickname}
+                onChangeText = {(text) => setform({...form, nickname: text})}
                 placeholder="NickName - Optional"
                 placeholderTextColor="rgba(255,255,255,0.6)"
               />
@@ -58,15 +140,18 @@ const filteredStates = states.filter(state =>
               {/* License Plate */}
               <TextInput
                 style={styles.input}
+                editable ={save ==='Edit'}
+                value={form.licence_plate}
+                onChangeText = {(text) => setform({...form, licence_plate: text})}
                 placeholder="License Plate"
                 placeholderTextColor="rgba(255,255,255,0.6)"
               />
 
               {/* State */}
-              <TouchableOpacity style={styles.input} onPress={() => setStatePickerOpen(true)}>
+              <TouchableOpacity style={styles.input} onPress={() => save ==='Edit' && setStatePickerOpen(true)}>
                 <View style={styles.StateRow}>
-                  <Text style={styles.StatePlaceholder}>
-                    {selectedState ? selectedState : 'License State'}
+                  <Text style={selectedState ? styles.StateSelected : styles.StatePlaceholder}>
+                      {selectedState ? selectedState : 'License State'}
                   </Text>
                   <Ionicons name="chevron-forward" size={20} color="rgba(255,255,255,0.6)" />
                 </View>
@@ -76,8 +161,8 @@ const filteredStates = states.filter(state =>
     style={styles.modalOverlay}
     activeOpacity={1}
     onPress={() => {
-      setStatePickerOpen(false);
-      setStateSearch('');
+    setStatePickerOpen(false)
+    setStateSearch('')
     }}
   >
     <TouchableOpacity style={styles.modalContent} activeOpacity={1}>
@@ -96,9 +181,10 @@ const filteredStates = states.filter(state =>
           <TouchableOpacity
             style={styles.stateOption}
             onPress={() => {
-              setSelectedState(item);
-              setStatePickerOpen(false);
-              setStateSearch('');
+     setSelectedState(item)
+    setform({...form, licence_state: item})
+    setStatePickerOpen(false)
+    setStateSearch('')
             }}
           >
             <Text style={styles.stateText}>{item}</Text>
@@ -111,6 +197,9 @@ const filteredStates = states.filter(state =>
               {/* Make */}
               <TextInput
                 style={styles.input}
+                editable ={save ==='Edit'}
+                value={form.make}
+                onChangeText = {(text) => setform({...form, make: text})}
                 placeholder="Make"
                 placeholderTextColor="rgba(255,255,255,0.6)"
               />
@@ -118,6 +207,9 @@ const filteredStates = states.filter(state =>
               {/* Model */}
               <TextInput
                 style={styles.input}
+                editable ={save ==='Edit'}
+                value={form.model}
+                onChangeText = {(text) => setform({...form, model: text})}
                 placeholder="Model"
                 placeholderTextColor="rgba(255,255,255,0.6)"
               />
@@ -125,6 +217,9 @@ const filteredStates = states.filter(state =>
               {/* Color */}
               <TextInput
                 style={styles.input}
+                editable ={save ==='Edit'}
+                value={form.color}
+                onChangeText = {(text) => setform({...form, color: text})}
                 placeholder="Color"
                 placeholderTextColor="rgba(255,255,255,0.6)"
               />
@@ -150,7 +245,7 @@ const filteredStates = states.filter(state =>
 
 
             {/* Submit */}
-            <TouchableOpacity style={ save === 'Delete' ? styles.SubmitButtonDelete : styles.SubmitButton} onPress={() => navigation.goBack()}>
+            <TouchableOpacity style={ save === 'Delete' ? styles.SubmitButtonDelete : styles.SubmitButton} onPress={() => handleSubmit() }>
               <Text style={styles.buttonText}>Confirm</Text>
             </TouchableOpacity>
 
@@ -337,5 +432,10 @@ SubmitButtonDelete:{
   borderColor: 'rgba(209, 0, 0, 0.7)',
     alignItems: 'center',
     justifyContent:'center',
+},
+StateSelected: {
+    color: 'rgba(255, 255, 255, 0.9)',
+    fontSize: 15,
+    fontFamily: 'Poppins_400Regular',
 },
 });

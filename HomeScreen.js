@@ -66,7 +66,7 @@ export default function HomeScreen({navigation}) {
         <TouchableOpacity 
             key={vehicle.id} 
             style={styles.VehicleCard} 
-            onPress={() => navigation.navigate('QuickRegister')}
+            onPress={() => navigation.navigate('QuickRegister', { vehicle })}
         >
             <Text style={styles.VehicleNick}>{vehicle.nickname || vehicle.licence_plate}</Text>
             <Text style={styles.VehicleDetail}>{vehicle.make} • {vehicle.model}</Text>
@@ -217,7 +217,7 @@ RightWidget: {
     marginLeft: 5,
     marginRight: 15,
     marginBottom: 30,
-    maxHeight: 280,  // add this
+    maxHeight: 280,  
 },
 QuickVehicles: {
     maxHeight: 365,

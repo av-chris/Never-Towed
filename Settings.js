@@ -32,21 +32,25 @@ await db.runAsync('DELETE FROM permits')
   console.log('PERMITS IN DATABASE:',PermitResult)
 
 }
-
+try{
 if(data === 'Delete all Saved Vehicles'){
-DeleteSaved();
+await DeleteSaved();
   Alert.alert('Success', 'All Saved Vehicle Data deleted successfully!');
 }
 else if(data === 'Delete all Permit History'){
-DeleteHistory();
+await DeleteHistory();
   Alert.alert('Success', 'All Vehicle Permit History deleted successfully!');
 }
 else if(data === 'Delete all Local Data'){
-DeleteSaved();
-DeleteHistory();
+await DeleteSaved();
+await DeleteHistory();
   Alert.alert('Success', 'All Local History deleted successfully!');
 }
-
+}
+catch(error){
+  console.error(error);
+  Alert.alert('Error', 'An error occurred');
+}
   }
 
   
