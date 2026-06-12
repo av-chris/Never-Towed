@@ -54,7 +54,7 @@ export default function AddVehicle({ navigation }) {
 
     // Sends vehicle data to the Express backend to create a permit,
     // then saves the returned permit (with issue/expiration dates) to local SQLite
-    async function Register() {
+     async function Register() {
       const response = await fetch(BASE_URL + '/RegisterVehicle', {
         method: 'POST',
         headers: {
@@ -102,14 +102,17 @@ export default function AddVehicle({ navigation }) {
       if (save === 'Only Save') {
         await Save();
         Alert.alert('Success', 'Vehicle saved successfully!');
+        navigation.navigate('Home')
       } else if (save === 'Only Register') {
         await Register();
         Alert.alert('Success', 'Vehicle registered successfully!');
+        navigation.navigate('Home')
       } else {
         // Default: Save and Register — hit the API and save to both tables
         await Register();
         await Save();
         Alert.alert('Success', 'Vehicle saved & registered successfully!');
+        navigation.navigate('Home')
       }
 
       // Reset form fields after successful submission

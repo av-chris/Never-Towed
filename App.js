@@ -42,7 +42,7 @@ export default function App() {
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false,contentStyle: { backgroundColor: '#0d0d0d' }}}>
         <Stack.Screen name="Login" component={LoginScreen} />
-        <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="Home" component={HomeScreen} options={{ gestureEnabled: false }} />
         <Stack.Screen name="AddVehicle" component={AddVehicle} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
         <Stack.Screen name="History" component={HistoryDetail} />
