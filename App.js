@@ -1,5 +1,6 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import LoginScreen from './LoginScreen';
 import HomeScreen from './HomeScreen';
 import AddVehicle from './AddVehicleScreen';
@@ -12,7 +13,8 @@ const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
-<SQLiteProvider 
+<SafeAreaProvider>
+  <SQLiteProvider
     databaseName = "nevertowed.db"
     onInit={async (db) =>{
         await db.execAsync(`
@@ -51,5 +53,6 @@ export default function App() {
       </Stack.Navigator>
     </NavigationContainer>
   </SQLiteProvider>
+</SafeAreaProvider>
   );
 }
