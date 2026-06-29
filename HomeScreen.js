@@ -4,19 +4,52 @@ import {
   Text,
   View,
   TouchableOpacity,
-  Dimensions,
+  useWindowDimensions,
   ScrollView,
-  SafeAreaView,
 } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFonts, Poppins_400Regular, Poppins_700Bold } from '@expo-google-fonts/poppins';
 import { Ionicons } from '@expo/vector-icons';
+import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useState, useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import BottomTabBar from './BottomTabBar';
 
-const { width } = Dimensions.get('window');
+function BottomTabBar({ navigation, active = 'Home' }) {
+  const insets = useSafeAreaInsets();
+  const tabs = [
+    { key: 'AddVehicle', icon: 'add', route: 'AddVehicle' },
+    { key: 'Home', icon: 'home', route: 'Home' },
+    { key: 'Settings', icon: 'settings-outline', route: 'Settings' },
+  ];
+
+  return (
+    <BlurView intensity={40} tint="dark" style={styles.tabBar}>
+      <View style={[styles.tabRow, { paddingBottom: 10 + insets.bottom }]}>
+        {tabs.map((tab) => {
+          const isActive = active === tab.key;
+          return (
+            <TouchableOpacity
+              key={tab.key}
+              style={[styles.tabButton, isActive && styles.tabButtonActive]}
+              onPress={() => {
+                if (tab.key !== active) navigation.navigate(tab.route);
+              }}
+              activeOpacity={0.7}
+            >
+              <Ionicons
+                name={tab.icon}
+                size={tab.key === 'AddVehicle' ? 26 : 24}
+                color={isActive ? '#a5b4fc' : 'rgba(255,255,255,0.45)'}
+              />
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+    </BlurView>
+  );
+}
 
 function getTimeRemaining(expirationDate) {
   if (!expirationDate) return { label: '24:00', expired: false, hasPermit: false };
@@ -57,6 +90,7 @@ function findVehicleForPermit(vehicles, permit) {
 }
 
 export default function HomeScreen({ navigation }) {
+  const { width } = useWindowDimensions();
   const db = useSQLiteContext();
   const [vehicles, setVehicles] = useState([]);
   const [permits, setPermits] = useState([]);
@@ -125,13 +159,15 @@ export default function HomeScreen({ navigation }) {
   return (
     <LinearGradient colors={['#1a1a2e', '#0d0d0d']} style={styles.container}>
       <StatusBar style="light" />
-      <SafeAreaView style={styles.safeArea}>
+      <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
         <View style={styles.dashboard}>
           {/* Header */}
           <View style={styles.header}>
             <View>
               <Text style={styles.greeting}>Never Towed</Text>
-              <Text style={styles.subGreeting}>Keep your car protected from surprise tows</Text>
+              <Text style={[styles.subGreeting, { maxWidth: width * 0.72 }]}>
+                Keep your car protected from surprise tows
+              </Text>
             </View>
             <View style={styles.headerIcon}>
               <Ionicons name="shield-checkmark" size={22} color="#a5b4fc" />
@@ -169,7 +205,17 @@ export default function HomeScreen({ navigation }) {
                 ) : null}
               </View>
 
-              <View style={[styles.timerRing, { borderColor: timerColor }]}>
+              <View
+                style={[
+                  styles.timerRing,
+                  {
+                    borderColor: timerColor,
+                    width: width * 0.26,
+                    height: width * 0.26,
+                    borderRadius: (width * 0.26) / 2,
+                  },
+                ]}
+              >
                 <Text style={styles.timerText}>{timer.label}</Text>
                 <Text style={styles.timerLabel}>
                   {activePermit ? 'Time left' : 'Default'}
@@ -313,7 +359,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins_400Regular',
     color: 'rgba(255,255,255,0.5)',
     marginTop: 2,
-    maxWidth: width * 0.72,
   },
   headerIcon: {
     width: 44,
@@ -439,9 +484,6 @@ const styles = StyleSheet.create({
     color: '#8e8e93',
   },
   timerRing: {
-    width: width * 0.26,
-    height: width * 0.26,
-    borderRadius: width * 0.13,
     borderWidth: 5,
     justifyContent: 'center',
     alignItems: 'center',
@@ -510,5 +552,29 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.35)',
     textAlign: 'center',
     lineHeight: 18,
+  },
+  tabBar: {
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.1)',
+    overflow: 'hidden',
+  },
+  tabRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    paddingTop: 10,
+    paddingHorizontal: 32,
+  },
+  tabButton: {
+    width: 52,
+    height: 52,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tabButtonActive: {
+    backgroundColor: 'rgba(99, 102, 241, 0.18)',
+    borderWidth: 1,
+    borderColor: 'rgba(99, 102, 241, 0.35)',
   },
 });
