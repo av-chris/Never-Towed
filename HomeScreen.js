@@ -12,7 +12,7 @@ import { useFonts, Poppins_400Regular, Poppins_700Bold } from '@expo-google-font
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSQLiteContext } from 'expo-sqlite';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import BottomTabBar from './components/BottomTabBar';
 
@@ -60,6 +60,13 @@ export default function HomeScreen({ navigation }) {
   const [vehicles, setVehicles] = useState([]);
   const [permits, setPermits] = useState([]);
   const [activePermit, setActivePermit] = useState(null);
+  // Tick forces a re-render every 60 s so the timer stays live without leaving the screen
+  const [tick, setTick] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => setTick((t) => t + 1), 60_000);
+    return () => clearInterval(interval);
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -85,6 +92,8 @@ export default function HomeScreen({ navigation }) {
   if (!fontsLoaded) return null;
 
   const activeVehicle = findVehicleForPermit(vehicles, activePermit);
+  // tick is read here so every 60-second tick triggers a re-render and fresh time calc
+  void tick;
   const timer = getTimeRemaining(activePermit?.expiration_date);
   const timerColor = timer.expired ? '#ff6b6b' : timer.hasPermit ? '#4cd964' : '#6366f1';
 
@@ -143,7 +152,7 @@ export default function HomeScreen({ navigation }) {
           <TouchableOpacity
             style={styles.currentCard}
             activeOpacity={0.85}
-            onPress={() => navigation.navigate('VehicleDetail')}
+            onPress={() => navigation.navigate('VehicleDetail', { permit: activePermit, vehicle: activeVehicle })}
           >
             <View style={styles.cardHeader}>
               <View style={styles.cardTitleRow}>
@@ -222,12 +231,20 @@ export default function HomeScreen({ navigation }) {
                       onPress={() => navigation.navigate('QuickRegister', { vehicle })}
                       activeOpacity={0.7}
                     >
-                      <Text style={styles.listItemTitle} numberOfLines={1}>
-                        {vehicle.nickname || vehicle.licence_plate}
-                      </Text>
-                      <Text style={styles.listItemSub} numberOfLines={1}>
-                        {vehicle.make} · {vehicle.model}
-                      </Text>
+                      <View style={styles.listItemRow}>
+                        <View style={styles.listItemIcon}>
+                          <Ionicons name="car-sport" size={13} color="#c4b5fd" />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.listItemTitle} numberOfLines={1}>
+                            {vehicle.nickname || vehicle.licence_plate}
+                          </Text>
+                          <Text style={styles.listItemSub} numberOfLines={1}>
+                            {vehicle.make} · {vehicle.model}
+                          </Text>
+                        </View>
+                        <Ionicons name="chevron-forward" size={12} color="rgba(255,255,255,0.2)" />
+                      </View>
                     </TouchableOpacity>
                   ))
                 )}
@@ -265,20 +282,26 @@ export default function HomeScreen({ navigation }) {
                       <TouchableOpacity
                         key={permit.id}
                         style={styles.listItem}
-                        onPress={() => navigation.navigate('History')}
+                        onPress={() => navigation.navigate('History', { permit })}
                         activeOpacity={0.7}
                       >
-                        <View style={styles.historyItemTop}>
-                          <Text style={styles.listItemTitle} numberOfLines={1}>
-                            {matched?.nickname || permit.licence_plate}
-                          </Text>
-                          {isActive ? (
-                            <View style={styles.activeDot} />
-                          ) : null}
+                        <View style={styles.listItemRow}>
+                          <View style={[styles.listItemIcon, isActive && styles.listItemIconActive]}>
+                            <Ionicons name="time" size={13} color={isActive ? '#4cd964' : '#fbbf24'} />
+                          </View>
+                          <View style={{ flex: 1 }}>
+                            <View style={styles.historyItemTop}>
+                              <Text style={styles.listItemTitle} numberOfLines={1}>
+                                {matched?.nickname || permit.licence_plate}
+                              </Text>
+                              {isActive && <View style={styles.activeDot} />}
+                            </View>
+                            <Text style={styles.listItemSub} numberOfLines={1}>
+                              {formatHistoryDate(permit.issue_date)} · {permit.make} {permit.model}
+                            </Text>
+                          </View>
+                          <Ionicons name="chevron-forward" size={12} color="rgba(255,255,255,0.2)" />
                         </View>
-                        <Text style={styles.listItemSub} numberOfLines={1}>
-                          {formatHistoryDate(permit.issue_date)} · {permit.make} {permit.model}
-                        </Text>
                       </TouchableOpacity>
                     );
                   })
@@ -479,6 +502,22 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.06)',
+  },
+  listItemRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  listItemIcon: {
+    width: 24,
+    height: 24,
+    borderRadius: 7,
+    backgroundColor: 'rgba(196,181,253,0.12)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  listItemIconActive: {
+    backgroundColor: 'rgba(76,217,100,0.12)',
   },
   listItemTitle: {
     color: '#ffffff',

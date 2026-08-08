@@ -2,6 +2,9 @@ import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { setSlideDirection } from '../navigationDirection';
+
+const TAB_ORDER = { AddVehicle: 0, Home: 1, Settings: 2 };
 
 export default function BottomTabBar({ navigation, active = 'Home' }) {
   const insets = useSafeAreaInsets();
@@ -21,7 +24,12 @@ export default function BottomTabBar({ navigation, active = 'Home' }) {
               key={tab.key}
               style={[styles.tabButton, isActive && styles.tabButtonActive]}
               onPress={() => {
-                if (tab.key !== active) navigation.navigate(tab.route);
+                if (tab.key !== active) {
+                  // Set slide direction before navigating so App.js options picks it up
+                  const goingRight = TAB_ORDER[tab.key] > TAB_ORDER[active];
+                  setSlideDirection(goingRight ? 'slide_from_right' : 'slide_from_left');
+                  navigation.navigate(tab.route);
+                }
               }}
               activeOpacity={0.7}
             >

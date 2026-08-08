@@ -1,194 +1,249 @@
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { useFonts, Poppins_400Regular, Poppins_700Bold } from '@expo-google-fonts/poppins';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import VehicleDetail from './VehicleDetails';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
+import { useSQLiteContext } from 'expo-sqlite';
+
+function formatDate(dateStr) {
+  if (!dateStr) return '—';
+  const d = new Date(dateStr);
+  if (Number.isNaN(d.getTime())) return dateStr;
+  return d.toLocaleString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
 
 export default function HistoryDetail({ route, navigation }) {
   const [fontsLoaded] = useFonts({ Poppins_400Regular, Poppins_700Bold });
+  const db = useSQLiteContext();
+
+  // Permit passed from HomeScreen history list
+  const permit = route?.params?.permit ?? null;
+
+  const isActive = permit?.is_active === 1;
+
+  const handleDelete = async () => {
+    if (!permit?.id) {
+      Alert.alert('Error', 'No permit selected.');
+      return;
+    }
+    Alert.alert(
+      'Delete Record',
+      'Remove this permit from history?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await db.runAsync('DELETE FROM permits WHERE id = ?', [permit.id]);
+              navigation.goBack();
+            } catch (err) {
+              console.error(err);
+              Alert.alert('Error', 'Could not delete permit.');
+            }
+          },
+        },
+      ]
+    );
+  };
+
   if (!fontsLoaded) return null;
+
+  const rows = [
+    { icon: 'card-outline', label: 'License Plate', value: permit?.licence_plate },
+    { icon: 'location-outline', label: 'State', value: permit?.licence_state },
+    { icon: 'car-outline', label: 'Make', value: permit?.make },
+    { icon: 'construct-outline', label: 'Model', value: permit?.model },
+    { icon: 'color-palette-outline', label: 'Color', value: permit?.color },
+    { icon: 'calendar-outline', label: 'Issued', value: formatDate(permit?.issue_date) },
+    { icon: 'timer-outline', label: 'Expires', value: formatDate(permit?.expiration_date) },
+  ];
 
   return (
     <LinearGradient colors={['#1a1a2e', '#0d0d0d']} style={styles.container}>
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-      <View style={styles.MainScreen}>
-        <View style={styles.Header}>
-          <TouchableOpacity style={styles.BackButton} onPress={() => navigation.goBack()}>
-            <Ionicons name="chevron-back" size={28} color="#ffffff" />
+      <StatusBar style="light" />
+      <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+            <Ionicons name="chevron-back" size={20} color="#ffffff" />
           </TouchableOpacity>
-          <Text style={styles.HeaderText}>Vehicle History</Text>
+          <View style={styles.headerCenter}>
+            <Text style={styles.headerTitle}>Permit Detail</Text>
+            <Text style={styles.headerSubtitle}>
+              {permit?.licence_plate ?? 'Permit history'}
+            </Text>
+          </View>
+          <View style={[styles.statusPill, { backgroundColor: isActive ? 'rgba(76,217,100,0.15)' : 'rgba(255,255,255,0.07)' }]}>
+            <View style={[styles.statusDot, { backgroundColor: isActive ? '#4cd964' : '#8e8e93' }]} />
+            <Text style={[styles.statusText, { color: isActive ? '#4cd964' : '#8e8e93' }]}>
+              {isActive ? 'Active' : 'Expired'}
+            </Text>
+          </View>
         </View>
 
-        <View style={styles.MainContent}>
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Info card */}
+          <View style={styles.card}>
+            <View style={styles.cardHeader}>
+              <View style={styles.cardIconBadge}>
+                <Ionicons name="document-text-outline" size={15} color="#fbbf24" />
+              </View>
+              <Text style={styles.cardTitle}>Permit Information</Text>
+            </View>
 
-          {/* Account */}
-          <View style={styles.ContentTab} >
-            <Text style={styles.ContentText}>NickName:</Text>
-            <Text style={styles.VehicleHistory}>My Car</Text>
+            {rows.map(({ icon, label, value }, i) => (
+              <View key={label} style={[styles.row, i === rows.length - 1 && styles.rowLast]}>
+                <View style={styles.rowLeft}>
+                  <Ionicons name={icon} size={14} color="rgba(165,180,252,0.6)" />
+                  <Text style={styles.rowLabel}>{label}</Text>
+                </View>
+                <Text style={styles.rowValue} numberOfLines={1}>{value ?? '—'}</Text>
+              </View>
+            ))}
           </View>
 
-
-          {/* License Plate */}
-          <View style={styles.ContentTab} >
-            <Text style={styles.ContentText}>License Plate:</Text>
-            <Text style={styles.VehicleHistory}>ABC1234</Text>
-          </View>
-
-
-          {/* License State */}
-          <View style={styles.ContentTab}>
-            <Text style={styles.ContentText}>License State:</Text>
-            <Text style={styles.VehicleHistory}>TX</Text>
-          </View>
-
-          {/* Make */}
-          <View style={styles.ContentTab}>
-            <Text style={styles.ContentText}>Make:</Text>
-            <Text style={styles.VehicleHistory}>Lexus</Text>
-          </View>
-
-          {/* Model */}
-          <View style={styles.ContentTab}>
-            <Text style={styles.ContentText}>Model:</Text>
-            <Text style={styles.VehicleHistory}>LS400</Text>
-          </View>
-
-          {/* Year */}
-          <View style={styles.ContentTab}>
-            <Text style={styles.ContentText}>Year:</Text>
-            <Text style={styles.VehicleHistory}>1992</Text>
-          </View>
-
-          {/* Color */}
-          <View style={styles.ContentTab}>
-            <Text style={styles.ContentText}>Color:</Text>
-            <Text style={styles.VehicleHistory}>Black</Text>
-          </View>
-
-          {/* Date Start */}
-          <View style={styles.ContentTab}>
-            <Text style={styles.ContentText}>Registration Start:</Text>
-            <Text style={styles.VehicleHistory}>Year-Month-Day 00:00</Text>
-          </View>
-
-
-
-          {/* Date End */}
-          <View style={styles.ContentTab}>
-            <Text style={styles.ContentText}>Registration End:</Text>
-            <Text style={styles.VehicleHistory}>Year-Month-Day 00:00</Text>
-          </View>
-          
-
-
-          {/* Delete */}
-          <TouchableOpacity style={[styles.ContentTab, styles.LogOut]} onPress={() => navigation.goBack()}>
-            <Text style={styles.LogOutText}>Delete From History</Text>
+          {/* Delete button */}
+          <TouchableOpacity style={styles.deleteButton} onPress={handleDelete} activeOpacity={0.8}>
+            <Ionicons name="trash-outline" size={16} color="#f87171" />
+            <Text style={styles.deleteText}>Delete From History</Text>
           </TouchableOpacity>
-
-        </View>
-      </View>
-      </ScrollView>
+        </ScrollView>
+      </SafeAreaView>
     </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  MainScreen: {
-    marginTop: 60,
-    borderWidth: 2,
-    borderColor: 'rgba(255,255,255,0.15)',
-    margin: 20,
-    borderRadius: 20,
-    paddingVertical: 10,
-    backgroundColor: 'rgba(255, 255, 255, 0.02)',
-
-  },
-  Header: {
-    justifyContent: 'center',
+  container: { flex: 1 },
+  safeArea: { flex: 1 },
+  /* Header */
+  header: {
+    flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 16,
-    borderBottomWidth: 0.3,
-    borderBottomColor: 'rgba(255,255,255,0.1)',
-    position: 'relative',
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 12,
+    gap: 12,
   },
-  BackButton: {
-    position: 'absolute',
-    left: 15,
-    zIndex: 1,
+  backButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.07)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.12)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  HeaderText: {
+  headerCenter: { flex: 1 },
+  headerTitle: {
     color: '#ffffff',
-    fontSize: 30,
+    fontSize: 20,
+    fontFamily: 'Poppins_700Bold',
+    lineHeight: 26,
+  },
+  headerSubtitle: {
+    color: 'rgba(255,255,255,0.4)',
+    fontSize: 12,
     fontFamily: 'Poppins_400Regular',
   },
-  MainContent: {
+  statusPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
     paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 20,
   },
-  ContentTab: {
-    justifyContent:'center',
-    alignItems:'center',
-    flexDirection:'row',
-    paddingVertical: 16,
-    paddingHorizontal: 10,
-    borderBottomWidth: 0.2,
-    borderBottomColor: 'rgba(255,255,255,0.1)',
+  statusDot: { width: 6, height: 6, borderRadius: 3 },
+  statusText: { fontSize: 11, fontFamily: 'Poppins_700Bold' },
+  /* Scroll */
+  scroll: { flex: 1 },
+  scrollContent: { paddingHorizontal: 20, paddingBottom: 32, gap: 14 },
+  /* Card */
+  card: {
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(251,191,36,0.2)',
+    padding: 16,
   },
-  ContentText: {
-    color: '#ffffffb2',
-    fontSize: 18,
-    fontFamily: 'Poppins_400Regular',
-    justifyContent:'flex-end',
-    alignItems:'flex-end',
-    flex:.87,
-
-  },
-  VehicleHistory:{
-    color: '#ffffff',
-    fontSize: 18,
-    fontFamily: 'Poppins_400Regular',
-    justifyContent:'flex-end',
-    alignItems:'flex-end',
-    flex:1,
-  },
-  DropdownContent: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    backgroundColor: 'rgba(255, 255, 255, 0.02)',
-    borderRadius: 10,
-    marginHorizontal: 10,
-    marginBottom: 5,
-    marginTop: 10,
-  },
-  DropdownText: {
-    color: '#8e8e93',
-    fontSize: 14,
-    fontFamily: 'Poppins_400Regular',
-    paddingVertical: 4,
-  },
-  DropdownLabel: {
-    color: '#ffffff',
-    fontSize: 14,
-    fontFamily: 'Poppins_400Regular',
-    marginTop: 12,
-    marginBottom: 6,
-  },
-  CheckboxRow: {
+  cardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    paddingVertical: 6,
+    marginBottom: 14,
   },
-  LogOut: {
+  cardIconBadge: {
+    width: 30,
+    height: 30,
+    borderRadius: 9,
+    backgroundColor: 'rgba(251,191,36,0.12)',
+    alignItems: 'center',
     justifyContent: 'center',
-    borderBottomWidth: 0,
   },
-  LogOutText: {
-    color: '#ff453a',
-    fontSize: 18,
+  cardTitle: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontFamily: 'Poppins_700Bold',
+  },
+  /* Rows */
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 11,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.06)',
+    gap: 8,
+  },
+  rowLast: { borderBottomWidth: 0 },
+  rowLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    flex: 1,
+  },
+  rowLabel: {
+    color: 'rgba(255,255,255,0.5)',
+    fontSize: 13,
     fontFamily: 'Poppins_400Regular',
   },
-  });
+  rowValue: {
+    color: '#ffffff',
+    fontSize: 13,
+    fontFamily: 'Poppins_700Bold',
+    maxWidth: '55%',
+    textAlign: 'right',
+  },
+  /* Delete */
+  deleteButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: 'rgba(248,113,113,0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(248,113,113,0.3)',
+    borderRadius: 16,
+    paddingVertical: 14,
+  },
+  deleteText: {
+    color: '#f87171',
+    fontSize: 15,
+    fontFamily: 'Poppins_700Bold',
+  },
+});
