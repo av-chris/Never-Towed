@@ -1,10 +1,25 @@
-import { StyleSheet, Text, View, TouchableOpacity, TextInput, Modal, FlatList, KeyboardAvoidingView, ScrollView, Platform, Alert } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  TextInput,
+  Modal,
+  FlatList,
+  KeyboardAvoidingView,
+  ScrollView,
+  Platform,
+  Alert,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFonts, Poppins_400Regular, Poppins_700Bold } from '@expo-google-fonts/poppins';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { useSQLiteContext } from 'expo-sqlite';
 import { BASE_URL } from './config';
+import BottomTabBar from './components/BottomTabBar';
 
 export default function AddVehicle({ navigation }) {
   const [fontsLoaded] = useFonts({ Poppins_400Regular, Poppins_700Bold });
@@ -54,19 +69,19 @@ export default function AddVehicle({ navigation }) {
 
     // Sends vehicle data to the Express backend to create a permit,
     // then saves the returned permit (with issue/expiration dates) to local SQLite
-     async function Register() {
+    async function Register() {
       const response = await fetch(BASE_URL + '/RegisterVehicle', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           licence_plate: form.licence_plate,
           licence_state: form.licence_state,
           make: form.make,
           model: form.model,
-          color: form.color
-        })
+          color: form.color,
+        }),
       });
 
       // Parse the permit object returned by the server
@@ -102,17 +117,17 @@ export default function AddVehicle({ navigation }) {
       if (save === 'Only Save') {
         await Save();
         Alert.alert('Success', 'Vehicle saved successfully!');
-        navigation.navigate('Home')
+        navigation.navigate('Home');
       } else if (save === 'Only Register') {
         await Register();
         Alert.alert('Success', 'Vehicle registered successfully!');
-        navigation.navigate('Home')
+        navigation.navigate('Home');
       } else {
         // Default: Save and Register — hit the API and save to both tables
         await Register();
         await Save();
         Alert.alert('Success', 'Vehicle saved & registered successfully!');
-        navigation.navigate('Home')
+        navigation.navigate('Home');
       }
 
       // Reset form fields after successful submission
@@ -135,139 +150,107 @@ export default function AddVehicle({ navigation }) {
 
   return (
     <LinearGradient colors={['#1a1a2e', '#0d0d0d']} style={styles.container}>
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      >
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-          <View style={styles.MainScreen}>
-
-            {/* Header with back button */}
-            <View style={styles.Header}>
-              <TouchableOpacity style={styles.BackButton} onPress={() => navigation.goBack()}>
-                <Ionicons name="chevron-back" size={28} color="#ffffff" />
+      <StatusBar style="light" />
+      <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
+            {/* Header */}
+            <View style={styles.header}>
+              <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+                <Ionicons name="chevron-back" size={24} color="#ffffff" />
               </TouchableOpacity>
-              <Text style={styles.HeaderText}>Add Vehicle</Text>
+              <View style={styles.headerTextGroup}>
+                <Text style={styles.headerTitle}>Add Vehicle</Text>
+                <Text style={styles.headerSub}>Save or register your car</Text>
+              </View>
+              <View style={styles.headerIcon}>
+                <Ionicons name="car-sport" size={22} color="#a5b4fc" />
+              </View>
             </View>
 
-            <View style={styles.MainContent}>
-
-              {/* Nickname — optional label for quick identification */}
-              <TextInput
-                style={styles.input}
-                placeholder="NickName - Optional"
-                placeholderTextColor="rgba(255,255,255,0.6)"
-                value={form.nickname}
-                onChangeText={(text) => setform({ ...form, nickname: text })}
-              />
-
-              {/* License plate input */}
-              <TextInput
-                style={styles.input}
-                placeholder="License Plate"
-                placeholderTextColor="rgba(255,255,255,0.6)"
-                value={form.licence_plate}
-                onChangeText={(text) => setform({ ...form, licence_plate: text })}
-              />
-
-              {/* State picker — opens modal with searchable list */}
-              <TouchableOpacity style={styles.input} onPress={() => setStatePickerOpen(true)}>
-                <View style={styles.StateRow}>
-                  <Text style={styles.StatePlaceholder}>
-                    {selectedState ? selectedState : 'License State'}
-                  </Text>
-                  <Ionicons name="chevron-forward" size={20} color="rgba(255,255,255,0.6)" />
+            {/* Form card */}
+            <View style={styles.card}>
+              {/* Card header */}
+              <View style={styles.cardHeader}>
+                <View style={styles.cardTitleRow}>
+                  <View style={styles.cardIconBadge}>
+                    <Ionicons name="document-text-outline" size={15} color="#a5b4fc" />
+                  </View>
+                  <Text style={styles.cardTitle}>Vehicle Details</Text>
                 </View>
-              </TouchableOpacity>
+              </View>
 
-              {/* State picker modal with live search filter */}
-              <Modal visible={statePickerOpen} transparent animationType="slide">
-                <TouchableOpacity
-                  style={styles.modalOverlay}
-                  activeOpacity={1}
-                  onPress={() => {
-                    setStatePickerOpen(false);
-                    setStateSearch('');
-                  }}
-                >
-                  <TouchableOpacity style={styles.modalContent} activeOpacity={1}>
+              {/* Input fields */}
+              <View style={styles.fieldGroup}>
+                {[
+                  { key: 'nickname', placeholder: 'Nickname (optional)', icon: 'pricetag-outline' },
+                  { key: 'licence_plate', placeholder: 'License Plate', icon: 'card-outline' },
+                  { key: 'make', placeholder: 'Make', icon: 'car-outline' },
+                  { key: 'model', placeholder: 'Model', icon: 'construct-outline' },
+                  { key: 'color', placeholder: 'Color', icon: 'color-palette-outline' },
+                ].map(({ key, placeholder, icon }) => (
+                  <View key={key} style={styles.inputWrapper}>
+                    <Ionicons name={icon} size={16} color="rgba(165,180,252,0.6)" style={styles.inputIcon} />
                     <TextInput
-                      style={styles.stateSearch}
-                      placeholder="Search state..."
-                      placeholderTextColor="rgba(255,255,255,0.4)"
-                      value={stateSearch}
-                      onChangeText={setStateSearch}
+                      style={styles.input}
+                      placeholder={placeholder}
+                      placeholderTextColor="rgba(255,255,255,0.3)"
+                      value={form[key]}
+                      onChangeText={(text) => setform({ ...form, [key]: text })}
                     />
-                    <FlatList
-                      data={filteredStates}
-                      keyExtractor={(item) => item}
-                      keyboardShouldPersistTaps="handled"
-                      renderItem={({ item }) => (
-                        <TouchableOpacity
-                          style={styles.stateOption}
-                          onPress={() => {
-                            // Update both display state and form state on selection
-                            setSelectedState(item);
-                            setform({ ...form, licence_state: item });
-                            setStatePickerOpen(false);
-                            setStateSearch('');
-                          }}
-                        >
-                          <Text style={styles.stateText}>{item}</Text>
-                        </TouchableOpacity>
-                      )}
-                    />
-                  </TouchableOpacity>
+                  </View>
+                ))}
+
+                {/* State picker — opens modal with searchable list */}
+                <TouchableOpacity style={styles.inputWrapper} onPress={() => setStatePickerOpen(true)}>
+                  <Ionicons name="location-outline" size={16} color="rgba(165,180,252,0.6)" style={styles.inputIcon} />
+                  <Text style={[styles.input, !selectedState && styles.placeholderText]}>
+                    {selectedState || 'License State'}
+                  </Text>
+                  <Ionicons name="chevron-forward" size={16} color="rgba(255,255,255,0.3)" />
                 </TouchableOpacity>
-              </Modal>
+              </View>
 
-              {/* Vehicle make, model, and color inputs */}
-              <TextInput
-                style={styles.input}
-                placeholder="Make"
-                placeholderTextColor="rgba(255,255,255,0.6)"
-                value={form.make}
-                onChangeText={(text) => setform({ ...form, make: text })}
-              />
+              <View style={styles.divider} />
 
-              <TextInput
-                style={styles.input}
-                placeholder="Model"
-                placeholderTextColor="rgba(255,255,255,0.6)"
-                value={form.model}
-                onChangeText={(text) => setform({ ...form, model: text })}
-              />
-
-              <TextInput
-                style={styles.input}
-                placeholder="Color"
-                placeholderTextColor="rgba(255,255,255,0.6)"
-                value={form.color}
-                onChangeText={(text) => setform({ ...form, color: text })}
-              />
-
-              {/* Dropdown to select submit behavior: Save and Register, Only Save, or Only Register */}
-              <View style={[styles.SubmitButtonWrapper, saveOpen && styles.SubmitButtonWrapperOpen]}>
-                <TouchableOpacity style={styles.SubmitButtonInner} onPress={() => setSaveOpen(!saveOpen)}>
-                  <Text style={styles.buttonText}>{save}</Text>
-                  <Ionicons name={saveOpen ? 'chevron-down' : 'chevron-forward'} size={20} color="rgba(255,255,255,0.6)" />
+              {/* Save/Register dropdown to select submit behavior */}
+              <View style={[styles.actionDropdown, saveOpen && styles.actionDropdownOpen]}>
+                <TouchableOpacity style={styles.actionDropdownHeader} onPress={() => setSaveOpen(!saveOpen)}>
+                  <View style={styles.cardTitleRow}>
+                    <View style={[styles.cardIconBadge, styles.actionBadge]}>
+                      <Ionicons name="options-outline" size={15} color="#c4b5fd" />
+                    </View>
+                    <Text style={styles.actionLabel}>{save}</Text>
+                  </View>
+                  <Ionicons
+                    name={saveOpen ? 'chevron-down' : 'chevron-forward'}
+                    size={18}
+                    color="rgba(255,255,255,0.4)"
+                  />
                 </TouchableOpacity>
 
                 {saveOpen && (
-                  <View style={styles.DropdownContent}>
+                  <View style={styles.actionDropdownBody}>
                     {['Save and Register', 'Only Save', 'Only Register'].map((option) => (
                       <TouchableOpacity
                         key={option}
-                        style={styles.CheckboxRow}
+                        style={styles.radioRow}
                         onPress={() => { setSave(option); setSaveOpen(false); }}
                       >
                         <Ionicons
                           name={save === option ? 'radio-button-on' : 'radio-button-off'}
-                          size={22}
-                          color="rgba(255,255,255,0.6)"
+                          size={20}
+                          color={save === option ? '#a5b4fc' : 'rgba(255,255,255,0.3)'}
                         />
-                        <Text style={styles.DropdownText}>
-                          {option.charAt(0).toUpperCase() + option.slice(1)}
+                        <Text style={[styles.radioText, save === option && styles.radioTextActive]}>
+                          {option}
                         </Text>
                       </TouchableOpacity>
                     ))}
@@ -275,15 +258,66 @@ export default function AddVehicle({ navigation }) {
                 )}
               </View>
 
-              {/* Submit button — triggers handleSubmit with the selected save option */}
-              <TouchableOpacity style={styles.SubmitButton} onPress={() => { handleSubmit(); }}>
-                <Text style={styles.buttonText}>Submit</Text>
+              {/* Submit button */}
+              <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+                <Ionicons name="checkmark-circle-outline" size={18} color="#ffffff" />
+                <Text style={styles.submitText}>Submit</Text>
               </TouchableOpacity>
-
             </View>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+          </ScrollView>
+        </KeyboardAvoidingView>
+
+        {/* State picker modal with live search filter */}
+        <Modal visible={statePickerOpen} transparent animationType="slide">
+          <TouchableOpacity
+            style={styles.modalOverlay}
+            activeOpacity={1}
+            onPress={() => {
+              setStatePickerOpen(false);
+              setStateSearch('');
+            }}
+          >
+            <TouchableOpacity style={styles.modalContent} activeOpacity={1}>
+              <View style={styles.modalHandle} />
+              <Text style={styles.modalTitle}>Select State</Text>
+              <View style={styles.searchWrapper}>
+                <Ionicons name="search-outline" size={16} color="rgba(255,255,255,0.4)" />
+                <TextInput
+                  style={styles.stateSearch}
+                  placeholder="Search state..."
+                  placeholderTextColor="rgba(255,255,255,0.3)"
+                  value={stateSearch}
+                  onChangeText={setStateSearch}
+                />
+              </View>
+              <FlatList
+                data={filteredStates}
+                keyExtractor={(item) => item}
+                keyboardShouldPersistTaps="handled"
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={styles.stateOption}
+                    onPress={() => {
+                      // Update both display state and form state on selection
+                      setSelectedState(item);
+                      setform({ ...form, licence_state: item });
+                      setStatePickerOpen(false);
+                      setStateSearch('');
+                    }}
+                  >
+                    <Text style={styles.stateText}>{item}</Text>
+                    {selectedState === item && (
+                      <Ionicons name="checkmark" size={18} color="#a5b4fc" />
+                    )}
+                  </TouchableOpacity>
+                )}
+              />
+            </TouchableOpacity>
+          </TouchableOpacity>
+        </Modal>
+
+        <BottomTabBar navigation={navigation} active="AddVehicle" />
+      </SafeAreaView>
     </LinearGradient>
   );
 }
@@ -292,143 +326,241 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  MainScreen: {
-    marginTop: 60,
-    borderWidth: 2,
-    borderColor: 'rgba(255,255,255,0.15)',
-    backgroundColor: 'rgba(255, 255, 255, 0.02)',
-    margin: 20,
-    borderRadius: 20,
-    paddingVertical: 10,
+  safeArea: {
+    flex: 1,
   },
-  Header: {
-    justifyContent: 'center',
+  scrollContent: {
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 16,
+  },
+  header: {
+    flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 16,
-    borderBottomWidth: 0.3,
-    borderBottomColor: 'rgba(255,255,255,0.1)',
-    position: 'relative',
+    justifyContent: 'space-between',
+    marginBottom: 16,
   },
-  BackButton: {
-    position: 'absolute',
-    left: 15,
-    zIndex: 1,
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  HeaderText: {
+  headerTextGroup: {
+    flex: 1,
+    paddingHorizontal: 12,
+  },
+  headerTitle: {
+    fontSize: 22,
+    fontFamily: 'Poppins_700Bold',
     color: '#ffffff',
-    fontSize: 40,
-    fontFamily: 'Poppins_400Regular',
+    letterSpacing: -0.5,
   },
-  MainContent: {
-    paddingTop: 10,
-    paddingHorizontal: 10,
+  headerSub: {
+    fontSize: 12,
+    fontFamily: 'Poppins_400Regular',
+    color: 'rgba(255,255,255,0.45)',
+    marginTop: 1,
+  },
+  headerIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: 'rgba(99,102,241,0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(99,102,241,0.25)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  card: {
+    borderRadius: 22,
+    padding: 18,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderWidth: 1,
+    borderColor: 'rgba(99,102,241,0.25)',
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  cardTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  cardIconBadge: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    backgroundColor: 'rgba(99,102,241,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cardTitle: {
+    fontSize: 13,
+    fontFamily: 'Poppins_700Bold',
+    color: '#ffffff',
+  },
+  fieldGroup: {
+    gap: 10,
+    marginBottom: 4,
+  },
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(99,102,241,0.15)',
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+  },
+  inputIcon: {
+    marginRight: 10,
   },
   input: {
-    color: 'rgba(255, 255, 255, 0.9)',
-    backgroundColor: 'rgba(255, 255, 255, 0.04)',
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    borderRadius: 40,
-    marginBottom: 16,
-    fontSize: 15,
-    fontFamily: 'Poppins_400Regular',
-    borderWidth: 0.5,
-    borderColor: 'rgba(255,255,255,0.3)',
-  },
-  StateRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  StatePlaceholder: {
-    color: 'rgba(255, 255, 255, 0.6)',
-    fontSize: 15,
-    fontFamily: 'Poppins_400Regular',
-  },
-  modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    backgroundColor: '#1c1c1e',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    height: '55%',
-    padding: 20,
-    paddingBottom: 35,
-  },
-  stateSearch: {
     color: '#ffffff',
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 10,
-    marginBottom: 10,
-    fontSize: 15,
+    fontSize: 14,
     fontFamily: 'Poppins_400Regular',
   },
-  stateOption: {
-    paddingVertical: 14,
-    borderBottomWidth: 0.5,
-    borderBottomColor: 'rgba(255,255,255,0.1)',
+  placeholderText: {
+    color: 'rgba(255,255,255,0.3)',
   },
-  stateText: {
-    color: '#ffffff',
-    fontSize: 16,
-    fontFamily: 'Poppins_400Regular',
+  divider: {
+    height: 1,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    marginVertical: 14,
   },
-  buttonText: {
-    color: 'rgba(255,255,255,0.6)',
-    fontSize: 16,
-    fontFamily: 'Poppins_700Bold',
+  actionDropdown: {
+    backgroundColor: 'rgba(255,255,255,0.04)',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(196,181,253,0.2)',
+    overflow: 'hidden',
+    marginBottom: 12,
   },
-  SubmitButton: {
-    color: 'rgba(255,255,255,0.6)',
-    backgroundColor: 'rgba(255, 255, 255, 0.04)',
-    paddingVertical: 14,
-    borderRadius: 40,
-    marginHorizontal: 110,
-    marginBottom: 16,
-    borderWidth: 0.5,
-    borderColor: 'rgba(255,255,255,0.3)',
+  actionDropdownOpen: {
+    borderRadius: 14,
+  },
+  actionDropdownHeader: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
+    padding: 12,
   },
-  DropdownContent: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderTopWidth: 0.5,
-    borderTopColor: 'rgba(255,255,255,0.1)',
+  actionBadge: {
+    backgroundColor: 'rgba(196,181,253,0.15)',
   },
-  CheckboxRow: {
+  actionLabel: {
+    fontSize: 13,
+    fontFamily: 'Poppins_700Bold',
+    color: '#ffffff',
+  },
+  actionDropdownBody: {
+    paddingHorizontal: 14,
+    paddingBottom: 12,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.06)',
+    gap: 4,
+  },
+  radioRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    paddingVertical: 6,
+    paddingVertical: 8,
   },
-  DropdownText: {
-    color: '#8e8e93',
+  radioText: {
+    fontSize: 13,
+    fontFamily: 'Poppins_400Regular',
+    color: 'rgba(255,255,255,0.5)',
+  },
+  radioTextActive: {
+    color: '#a5b4fc',
+    fontFamily: 'Poppins_700Bold',
+  },
+  submitButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: 'rgba(99,102,241,0.25)',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(99,102,241,0.5)',
+    paddingVertical: 14,
+  },
+  submitText: {
+    color: '#ffffff',
+    fontSize: 15,
+    fontFamily: 'Poppins_700Bold',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: '#16162a',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    height: '55%',
+    padding: 20,
+    paddingBottom: 35,
+    borderTopWidth: 1,
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderColor: 'rgba(99,102,241,0.25)',
+  },
+  modalHandle: {
+    width: 36,
+    height: 4,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderRadius: 2,
+    alignSelf: 'center',
+    marginBottom: 14,
+  },
+  modalTitle: {
+    fontSize: 16,
+    fontFamily: 'Poppins_700Bold',
+    color: '#ffffff',
+    marginBottom: 12,
+  },
+  searchWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: 'rgba(255,255,255,0.07)',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(99,102,241,0.15)',
+  },
+  stateSearch: {
+    flex: 1,
+    color: '#ffffff',
+    paddingVertical: 10,
     fontSize: 14,
     fontFamily: 'Poppins_400Regular',
-    paddingVertical: 4,
   },
-  SubmitButtonWrapper: {
-    backgroundColor: 'rgba(255,255,255,0.04)',
-    borderRadius: 40,
-    borderWidth: 0.5,
-    borderColor: 'rgba(255,255,255,0.3)',
-    marginBottom: 16,
-    overflow: 'hidden',
-  },
-  SubmitButtonWrapperOpen: {
-    borderRadius: 20,
-  },
-  SubmitButtonInner: {
+  stateOption: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: 16,
+    justifyContent: 'space-between',
+    paddingVertical: 13,
+    borderBottomWidth: 0.5,
+    borderBottomColor: 'rgba(255,255,255,0.07)',
+  },
+  stateText: {
+    color: '#ffffff',
+    fontSize: 15,
+    fontFamily: 'Poppins_400Regular',
   },
 });
