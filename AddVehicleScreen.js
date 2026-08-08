@@ -19,7 +19,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { useSQLiteContext } from 'expo-sqlite';
 import { BASE_URL } from './config';
-import BottomTabBar from './components/BottomTabBar';
 
 export default function AddVehicle({ navigation }) {
   const [fontsLoaded] = useFonts({ Poppins_400Regular, Poppins_700Bold });
@@ -316,7 +315,6 @@ export default function AddVehicle({ navigation }) {
           </TouchableOpacity>
         </Modal>
 
-        <BottomTabBar navigation={navigation} active="AddVehicle" />
       </SafeAreaView>
     </LinearGradient>
   );

@@ -42,7 +42,7 @@ export default function LoginScreen({ navigation }) {
 
       if (data.token) {
         await AsyncStorage.setItem('token', data.token);
-        navigation.navigate('Home');
+        navigation.navigate('Tabs');
       } else Alert.alert('Error', data.message);
     } catch (error) {
       console.log(error);
@@ -137,7 +137,7 @@ export default function LoginScreen({ navigation }) {
 
             <Pressable
               style={({ pressed }) => [styles.signInButton, pressed && styles.signInButtonPressed]}
-              onPress={() => navigation.navigate('Home')}
+              onPress={() => navigation.navigate('Tabs')}
             >
               <LinearGradient
                 colors={['#6366f1', '#4f46e5']}

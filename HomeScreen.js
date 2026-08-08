@@ -14,7 +14,6 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useState, useCallback, useEffect } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import BottomTabBar from './components/BottomTabBar';
 
 function getTimeRemaining(expirationDate) {
   if (!expirationDate) return { label: '24:00', expired: false, hasPermit: false };
@@ -311,7 +310,6 @@ export default function HomeScreen({ navigation }) {
           </View>
         </View>
 
-        <BottomTabBar navigation={navigation} active="Home" />
       </SafeAreaView>
     </LinearGradient>
   );

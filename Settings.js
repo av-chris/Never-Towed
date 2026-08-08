@@ -6,7 +6,6 @@ import { useState } from 'react';
 import { useSQLiteContext } from 'expo-sqlite';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
-import BottomTabBar from './components/BottomTabBar';
 
 export default function SettingsScreen({ navigation }) {
   const [fontsLoaded] = useFonts({ Poppins_400Regular, Poppins_700Bold });
@@ -267,7 +266,6 @@ export default function SettingsScreen({ navigation }) {
           </View>
         </ScrollView>
 
-        <BottomTabBar navigation={navigation} active="Settings" />
       </SafeAreaView>
     </LinearGradient>
   );
