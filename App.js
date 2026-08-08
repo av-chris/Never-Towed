@@ -13,7 +13,8 @@ const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
-<SQLiteProvider 
+<SafeAreaProvider>
+  <SQLiteProvider
     databaseName = "nevertowed.db"
     onInit={async (db) =>{
         await db.execAsync(`
@@ -54,5 +55,6 @@ export default function App() {
       </NavigationContainer>
     </SafeAreaProvider>
   </SQLiteProvider>
+</SafeAreaProvider>
   );
 }
