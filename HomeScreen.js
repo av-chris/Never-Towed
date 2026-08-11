@@ -58,7 +58,8 @@ export default function HomeScreen({ navigation }) {
   const db = useSQLiteContext();
   const [vehicles, setVehicles] = useState([]);
   const [permits, setPermits] = useState([]);
-  const [activePermit, setActivePermit] = useState(null);
+  // All active permits; single = static card, multiple = horizontal paged scroll
+  const [activePermits, setActivePermits] = useState([]);
   // Tick forces a re-render every 60 s so the timer stays live without leaving the screen
   const [tick, setTick] = useState(0);
 
@@ -75,12 +76,12 @@ export default function HomeScreen({ navigation }) {
           'SELECT * FROM permits ORDER BY issue_date DESC'
         );
         const activeResult = await db.getAllAsync(
-          'SELECT * FROM permits WHERE is_active = 1 ORDER BY expiration_date DESC LIMIT 1'
+          'SELECT * FROM permits WHERE is_active = 1 ORDER BY expiration_date DESC'
         );
 
         setVehicles(vehicleResult);
         setPermits(permitResult);
-        setActivePermit(activeResult[0] ?? null);
+        setActivePermits(activeResult);
       };
       loadData();
     }, [db])
@@ -90,44 +91,126 @@ export default function HomeScreen({ navigation }) {
 
   if (!fontsLoaded) return null;
 
-  const activeVehicle = findVehicleForPermit(vehicles, activePermit);
-  // tick is read here so every 60-second tick triggers a re-render and fresh time calc
-  void tick;
-  const timer = getTimeRemaining(activePermit?.expiration_date);
-  const timerColor = timer.expired ? '#ff6b6b' : timer.hasPermit ? '#4cd964' : '#6366f1';
+  // First active permit used for single-card / fallback display
+  const activePermit = activePermits[0] ?? null;
 
-  const displayName =
-    activeVehicle?.nickname ||
-    activePermit?.licence_plate ||
-    vehicles[0]?.nickname ||
-    vehicles[0]?.licence_plate ||
-    'No vehicle selected';
+  // Width for each paged card inside the padded dashboard (paddingHorizontal: 16 on each side)
+  const cardWidth = width - 32;
 
-  const displayMakeModel = activePermit
-    ? `${activePermit.make} · ${activePermit.model}`
-    : vehicles[0]
-      ? `${vehicles[0].make} · ${vehicles[0].model}`
-      : 'Add a vehicle to get started';
+  // Clears the given permit's active flag in SQLite and refreshes the active list (DEV only)
+  const handleDebugClear = async (permit) => {
+    if (!permit?.id) return;
+    await db.runAsync('UPDATE permits SET is_active = 0 WHERE id = ?', [permit.id]);
+    const activeResult = await db.getAllAsync(
+      'SELECT * FROM permits WHERE is_active = 1 ORDER BY expiration_date DESC'
+    );
+    setActivePermits(activeResult);
+  };
 
-  const displayPlate = activePermit
-    ? `${activePermit.licence_plate} · ${activePermit.licence_state}`
-    : vehicles[0]
-      ? `${vehicles[0].licence_plate} · ${vehicles[0].licence_state}`
-      : null;
+  // Renders one hero card for a given permit (permit may be null = no active permit)
+  const renderHeroCard = (permit, extraStyle) => {
+    const vehicle = findVehicleForPermit(vehicles, permit);
+    // Access tick so every 60-second tick triggers a fresh time calculation
+    void tick;
+    const timer = getTimeRemaining(permit?.expiration_date);
+    const timerColor = timer.expired ? '#ff6b6b' : timer.hasPermit ? '#4cd964' : '#6366f1';
 
-  const statusLabel = timer.expired
-    ? 'Permit expired'
-    : activePermit
-      ? 'Protected'
-      : 'Not registered';
+    const displayName =
+      vehicle?.nickname ||
+      permit?.licence_plate ||
+      vehicles[0]?.nickname ||
+      vehicles[0]?.licence_plate ||
+      'No vehicle selected';
 
-  const statusColor = timer.expired
-    ? 'rgba(255, 107, 107, 0.15)'
-    : activePermit
-      ? 'rgba(76, 217, 100, 0.15)'
-      : 'rgba(255,255,255,0.08)';
+    const displayMakeModel = permit
+      ? `${permit.make} · ${permit.model}`
+      : vehicles[0]
+        ? `${vehicles[0].make} · ${vehicles[0].model}`
+        : 'Add a vehicle to get started';
 
-  const statusTextColor = timer.expired ? '#ff6b6b' : activePermit ? '#4cd964' : '#8e8e93';
+    const displayPlate = permit
+      ? `${permit.licence_plate} · ${permit.licence_state}`
+      : vehicles[0]
+        ? `${vehicles[0].licence_plate} · ${vehicles[0].licence_state}`
+        : null;
+
+    const statusLabel = timer.expired
+      ? 'Permit expired'
+      : permit
+        ? 'Protected'
+        : 'Not registered';
+
+    const statusColor = timer.expired
+      ? 'rgba(255, 107, 107, 0.15)'
+      : permit
+        ? 'rgba(76, 217, 100, 0.15)'
+        : 'rgba(255,255,255,0.08)';
+
+    const statusTextColor = timer.expired ? '#ff6b6b' : permit ? '#4cd964' : '#8e8e93';
+
+    return (
+      <TouchableOpacity
+        key={permit?.id ?? 'empty'}
+        style={[styles.currentCard, extraStyle]}
+        activeOpacity={0.85}
+        onPress={() => navigation.navigate('VehicleDetail', { permit, vehicle })}
+      >
+        <View style={styles.cardHeader}>
+          <View style={styles.cardTitleRow}>
+            <View style={[styles.cardIconBadge, styles.currentBadge]}>
+              <Ionicons name="car-sport" size={16} color="#a5b4fc" />
+            </View>
+            <Text style={styles.cardTitle}>Current Vehicle</Text>
+          </View>
+          <View style={[styles.statusPill, { backgroundColor: statusColor }]}>
+            <View style={[styles.statusDot, { backgroundColor: statusTextColor }]} />
+            <Text style={[styles.statusText, { color: statusTextColor }]}>{statusLabel}</Text>
+          </View>
+        </View>
+
+        <View style={styles.currentBody}>
+          <View style={styles.currentInfo}>
+            <Text style={styles.vehicleName}>{displayName}</Text>
+            <Text style={styles.vehicleDetail}>{displayMakeModel}</Text>
+            {displayPlate ? (
+              <View style={styles.plateRow}>
+                <Ionicons name="card-outline" size={14} color="#8e8e93" />
+                <Text style={styles.plateText}>{displayPlate}</Text>
+              </View>
+            ) : null}
+          </View>
+
+          <View
+            style={[
+              styles.timerRing,
+              {
+                borderColor: timerColor,
+                width: width * 0.26,
+                height: width * 0.26,
+                borderRadius: (width * 0.26) / 2,
+              },
+            ]}
+          >
+            <Text style={styles.timerText}>{timer.label}</Text>
+            <Text style={styles.timerLabel}>
+              {permit ? 'Time left' : 'Default'}
+            </Text>
+          </View>
+        </View>
+
+        {/* Debug-only button to clear active status — never shown in production */}
+        {__DEV__ && permit && (
+          <TouchableOpacity
+            style={styles.debugButton}
+            onPress={() => handleDebugClear(permit)}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.debugText}>Debug: Clear</Text>
+          </TouchableOpacity>
+        )}
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <LinearGradient colors={['#1a1a2e', '#0d0d0d']} style={styles.container}>
@@ -147,55 +230,19 @@ export default function HomeScreen({ navigation }) {
             </View>
           </View>
 
-          {/* Current Vehicle — hero card */}
-          <TouchableOpacity
-            style={styles.currentCard}
-            activeOpacity={0.85}
-            onPress={() => navigation.navigate('VehicleDetail', { permit: activePermit, vehicle: activeVehicle })}
-          >
-            <View style={styles.cardHeader}>
-              <View style={styles.cardTitleRow}>
-                <View style={[styles.cardIconBadge, styles.currentBadge]}>
-                  <Ionicons name="car-sport" size={16} color="#a5b4fc" />
-                </View>
-                <Text style={styles.cardTitle}>Current Vehicle</Text>
-              </View>
-              <View style={[styles.statusPill, { backgroundColor: statusColor }]}>
-                <View style={[styles.statusDot, { backgroundColor: statusTextColor }]} />
-                <Text style={[styles.statusText, { color: statusTextColor }]}>{statusLabel}</Text>
-              </View>
-            </View>
-
-            <View style={styles.currentBody}>
-              <View style={styles.currentInfo}>
-                <Text style={styles.vehicleName}>{displayName}</Text>
-                <Text style={styles.vehicleDetail}>{displayMakeModel}</Text>
-                {displayPlate ? (
-                  <View style={styles.plateRow}>
-                    <Ionicons name="card-outline" size={14} color="#8e8e93" />
-                    <Text style={styles.plateText}>{displayPlate}</Text>
-                  </View>
-                ) : null}
-              </View>
-
-              <View
-                style={[
-                  styles.timerRing,
-                  {
-                    borderColor: timerColor,
-                    width: width * 0.26,
-                    height: width * 0.26,
-                    borderRadius: (width * 0.26) / 2,
-                  },
-                ]}
-              >
-                <Text style={styles.timerText}>{timer.label}</Text>
-                <Text style={styles.timerLabel}>
-                  {activePermit ? 'Time left' : 'Default'}
-                </Text>
-              </View>
-            </View>
-          </TouchableOpacity>
+          {/* Current Vehicle — single static card or horizontal paged scroll */}
+          {activePermits.length > 1 ? (
+            <ScrollView
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              style={styles.heroScroll}
+            >
+              {activePermits.map((p) => renderHeroCard(p, { width: cardWidth }))}
+            </ScrollView>
+          ) : (
+            renderHeroCard(activePermit, null)
+          )}
 
           {/* Saved Vehicles + History */}
           <View style={styles.bottomRow}>
@@ -356,6 +403,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  /* Hero scroll — only rendered when there are multiple active permits */
+  heroScroll: {
+    flexGrow: 0,
+  },
   currentCard: {
     borderRadius: 22,
     padding: 18,
@@ -485,6 +536,22 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins_400Regular',
     fontSize: 10,
     marginTop: 2,
+  },
+  /* Debug button — only visible in __DEV__ builds */
+  debugButton: {
+    alignSelf: 'flex-start',
+    marginTop: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255,255,255,0.07)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.12)',
+  },
+  debugText: {
+    color: 'rgba(255,255,255,0.4)',
+    fontSize: 10,
+    fontFamily: 'Poppins_400Regular',
   },
   cardScroll: {
     flex: 1,

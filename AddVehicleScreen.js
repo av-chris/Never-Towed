@@ -20,6 +20,9 @@ import { useState } from 'react';
 import { useSQLiteContext } from 'expo-sqlite';
 import { BASE_URL } from './config';
 
+// Maximum number of simultaneously active permits allowed
+const ACTIVE_PERMIT_LIMIT = 1;
+
 export default function AddVehicle({ navigation }) {
   const [fontsLoaded] = useFonts({ Poppins_400Regular, Poppins_700Bold });
 
@@ -111,6 +114,20 @@ export default function AddVehicle({ navigation }) {
       // Validate that all required fields are filled before proceeding
       if (!form.licence_plate || !form.licence_state || !form.make || !form.model || !form.color)
         throw new Error('All fields are required');
+
+      // Check active permit limit before any registration attempt
+      if (save !== 'Only Save') {
+        const activeCount = await db.getFirstAsync(
+          'SELECT COUNT(*) as count FROM permits WHERE is_active = 1'
+        );
+        if (activeCount.count >= ACTIVE_PERMIT_LIMIT) {
+          Alert.alert(
+            'Limit Reached',
+            'You must wait for the current permit to expire before registering another vehicle.'
+          );
+          return;
+        }
+      }
 
       // Execute the appropriate action based on the user's selected option
       if (save === 'Only Save') {
