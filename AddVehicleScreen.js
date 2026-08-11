@@ -16,11 +16,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFonts, Poppins_400Regular, Poppins_700Bold } from '@expo-google-fonts/poppins';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useSQLiteContext } from 'expo-sqlite';
 import { BASE_URL } from './config';
+import { useTheme } from './ThemeContext';
 
 export default function AddVehicle({ navigation }) {
+  const { colors } = useTheme();
   const [fontsLoaded] = useFonts({ Poppins_400Regular, Poppins_700Bold });
 
   // Full list of US states for the state picker modal
@@ -145,11 +147,13 @@ export default function AddVehicle({ navigation }) {
     }
   };
 
+  const styles = useMemo(() => createStyles(colors), [colors]);
+
   if (!fontsLoaded) return null;
 
   return (
-    <LinearGradient colors={['#1a1a2e', '#0d0d0d']} style={styles.container}>
-      <StatusBar style="light" />
+    <LinearGradient colors={[colors.gradientStart, colors.gradientEnd]} style={styles.container}>
+      <StatusBar style={colors.statusBar} />
       <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
         <KeyboardAvoidingView
           style={{ flex: 1 }}
@@ -200,7 +204,7 @@ export default function AddVehicle({ navigation }) {
                     <TextInput
                       style={styles.input}
                       placeholder={placeholder}
-                      placeholderTextColor="rgba(255,255,255,0.3)"
+                      placeholderTextColor={colors.textPlaceholder}
                       value={form[key]}
                       onChangeText={(text) => setform({ ...form, [key]: text })}
                     />
@@ -210,10 +214,10 @@ export default function AddVehicle({ navigation }) {
                 {/* State picker — opens modal with searchable list */}
                 <TouchableOpacity style={styles.inputWrapper} onPress={() => setStatePickerOpen(true)}>
                   <Ionicons name="location-outline" size={16} color="rgba(165,180,252,0.6)" style={styles.inputIcon} />
-                  <Text style={[styles.input, !selectedState && styles.placeholderText]}>
+                  <Text style={[styles.input, !selectedState && { color: colors.textPlaceholder }]}>
                     {selectedState || 'License State'}
                   </Text>
-                  <Ionicons name="chevron-forward" size={16} color="rgba(255,255,255,0.3)" />
+                  <Ionicons name="chevron-forward" size={16} color={colors.chevron} />
                 </TouchableOpacity>
               </View>
 
@@ -284,7 +288,7 @@ export default function AddVehicle({ navigation }) {
                 <TextInput
                   style={styles.stateSearch}
                   placeholder="Search state..."
-                  placeholderTextColor="rgba(255,255,255,0.3)"
+                  placeholderTextColor={colors.textPlaceholder}
                   value={stateSearch}
                   onChangeText={setStateSearch}
                 />
@@ -320,245 +324,97 @@ export default function AddVehicle({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  safeArea: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 16,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 16,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: 'rgba(255,255,255,0.05)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerTextGroup: {
-    flex: 1,
-    paddingHorizontal: 12,
-  },
-  headerTitle: {
-    fontSize: 22,
-    fontFamily: 'Poppins_700Bold',
-    color: '#ffffff',
-    letterSpacing: -0.5,
-  },
-  headerSub: {
-    fontSize: 12,
-    fontFamily: 'Poppins_400Regular',
-    color: 'rgba(255,255,255,0.45)',
-    marginTop: 1,
-  },
-  headerIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
-    backgroundColor: 'rgba(99,102,241,0.15)',
-    borderWidth: 1,
-    borderColor: 'rgba(99,102,241,0.25)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  card: {
-    borderRadius: 22,
-    padding: 18,
-    backgroundColor: 'rgba(255,255,255,0.05)',
-    borderWidth: 1,
-    borderColor: 'rgba(99,102,241,0.25)',
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 16,
-  },
-  cardTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  cardIconBadge: {
-    width: 28,
-    height: 28,
-    borderRadius: 8,
-    backgroundColor: 'rgba(99,102,241,0.2)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  cardTitle: {
-    fontSize: 13,
-    fontFamily: 'Poppins_700Bold',
-    color: '#ffffff',
-  },
-  fieldGroup: {
-    gap: 10,
-    marginBottom: 4,
-  },
-  inputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.05)',
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: 'rgba(99,102,241,0.15)',
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-  },
-  inputIcon: {
-    marginRight: 10,
-  },
-  input: {
-    flex: 1,
-    color: '#ffffff',
-    fontSize: 14,
-    fontFamily: 'Poppins_400Regular',
-  },
-  placeholderText: {
-    color: 'rgba(255,255,255,0.3)',
-  },
-  divider: {
-    height: 1,
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    marginVertical: 14,
-  },
-  actionDropdown: {
-    backgroundColor: 'rgba(255,255,255,0.04)',
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: 'rgba(196,181,253,0.2)',
-    overflow: 'hidden',
-    marginBottom: 12,
-  },
-  actionDropdownOpen: {
-    borderRadius: 14,
-  },
-  actionDropdownHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 12,
-  },
-  actionBadge: {
-    backgroundColor: 'rgba(196,181,253,0.15)',
-  },
-  actionLabel: {
-    fontSize: 13,
-    fontFamily: 'Poppins_700Bold',
-    color: '#ffffff',
-  },
-  actionDropdownBody: {
-    paddingHorizontal: 14,
-    paddingBottom: 12,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.06)',
-    gap: 4,
-  },
-  radioRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    paddingVertical: 8,
-  },
-  radioText: {
-    fontSize: 13,
-    fontFamily: 'Poppins_400Regular',
-    color: 'rgba(255,255,255,0.5)',
-  },
-  radioTextActive: {
-    color: '#a5b4fc',
-    fontFamily: 'Poppins_700Bold',
-  },
-  submitButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    backgroundColor: 'rgba(99,102,241,0.25)',
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: 'rgba(99,102,241,0.5)',
-    paddingVertical: 14,
-  },
-  submitText: {
-    color: '#ffffff',
-    fontSize: 15,
-    fontFamily: 'Poppins_700Bold',
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    backgroundColor: '#16162a',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    height: '55%',
-    padding: 20,
-    paddingBottom: 35,
-    borderTopWidth: 1,
-    borderLeftWidth: 1,
-    borderRightWidth: 1,
-    borderColor: 'rgba(99,102,241,0.25)',
-  },
-  modalHandle: {
-    width: 36,
-    height: 4,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    borderRadius: 2,
-    alignSelf: 'center',
-    marginBottom: 14,
-  },
-  modalTitle: {
-    fontSize: 16,
-    fontFamily: 'Poppins_700Bold',
-    color: '#ffffff',
-    marginBottom: 12,
-  },
-  searchWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    backgroundColor: 'rgba(255,255,255,0.07)',
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(99,102,241,0.15)',
-  },
-  stateSearch: {
-    flex: 1,
-    color: '#ffffff',
-    paddingVertical: 10,
-    fontSize: 14,
-    fontFamily: 'Poppins_400Regular',
-  },
-  stateOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 13,
-    borderBottomWidth: 0.5,
-    borderBottomColor: 'rgba(255,255,255,0.07)',
-  },
-  stateText: {
-    color: '#ffffff',
-    fontSize: 15,
-    fontFamily: 'Poppins_400Regular',
-  },
-});
+function createStyles(c) {
+  return StyleSheet.create({
+    container: { flex: 1 },
+    safeArea: { flex: 1 },
+    scrollContent: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 16 },
+    header: {
+      flexDirection: 'row', alignItems: 'center',
+      justifyContent: 'space-between', marginBottom: 16,
+    },
+    backButton: {
+      width: 40, height: 40, borderRadius: 12,
+      backgroundColor: c.backBtnBg, borderWidth: 1,
+      borderColor: c.backBtnBorder, alignItems: 'center', justifyContent: 'center',
+    },
+    headerTextGroup: { flex: 1, paddingHorizontal: 12 },
+    headerTitle: { fontSize: 22, fontFamily: 'Poppins_700Bold', color: c.text, letterSpacing: -0.5 },
+    headerSub: { fontSize: 12, fontFamily: 'Poppins_400Regular', color: c.textSecondary, marginTop: 1 },
+    headerIcon: {
+      width: 44, height: 44, borderRadius: 14,
+      backgroundColor: c.headerBadgeBg, borderWidth: 1,
+      borderColor: c.headerBadgeBorder, alignItems: 'center', justifyContent: 'center',
+    },
+    card: {
+      borderRadius: 22, padding: 18,
+      backgroundColor: c.surface, borderWidth: 1, borderColor: c.border,
+    },
+    cardHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
+    cardTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    cardIconBadge: {
+      width: 28, height: 28, borderRadius: 8,
+      backgroundColor: c.cardBadgePrimary, alignItems: 'center', justifyContent: 'center',
+    },
+    cardTitle: { fontSize: 13, fontFamily: 'Poppins_700Bold', color: c.text },
+    fieldGroup: { gap: 10, marginBottom: 4 },
+    inputWrapper: {
+      flexDirection: 'row', alignItems: 'center',
+      backgroundColor: c.surfaceInput, borderRadius: 14,
+      borderWidth: 1, borderColor: c.borderInput,
+      paddingHorizontal: 14, paddingVertical: 12,
+    },
+    inputIcon: { marginRight: 10 },
+    input: { flex: 1, color: c.text, fontSize: 14, fontFamily: 'Poppins_400Regular' },
+    divider: { height: 1, backgroundColor: c.borderSubtle, marginVertical: 14 },
+    actionDropdown: {
+      backgroundColor: c.surface, borderRadius: 14,
+      borderWidth: 1, borderColor: c.cardBadgePurple, overflow: 'hidden', marginBottom: 12,
+    },
+    actionDropdownOpen: { borderRadius: 14 },
+    actionDropdownHeader: {
+      flexDirection: 'row', alignItems: 'center',
+      justifyContent: 'space-between', padding: 12,
+    },
+    actionBadge: { backgroundColor: c.cardBadgePurple },
+    actionLabel: { fontSize: 13, fontFamily: 'Poppins_700Bold', color: c.text },
+    actionDropdownBody: {
+      paddingHorizontal: 14, paddingBottom: 12,
+      borderTopWidth: 1, borderTopColor: c.borderSubtle, gap: 4,
+    },
+    radioRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 8 },
+    radioText: { fontSize: 13, fontFamily: 'Poppins_400Regular', color: c.textSecondary },
+    radioTextActive: { color: '#a5b4fc', fontFamily: 'Poppins_700Bold' },
+    submitButton: {
+      flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+      gap: 8, backgroundColor: 'rgba(99,102,241,0.25)',
+      borderRadius: 14, borderWidth: 1, borderColor: 'rgba(99,102,241,0.5)', paddingVertical: 14,
+    },
+    submitText: { color: '#ffffff', fontSize: 15, fontFamily: 'Poppins_700Bold' },
+    modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end' },
+    modalContent: {
+      backgroundColor: c.modalBg,
+      borderTopLeftRadius: 24, borderTopRightRadius: 24,
+      height: '55%', padding: 20, paddingBottom: 35,
+      borderTopWidth: 1, borderLeftWidth: 1, borderRightWidth: 1,
+      borderColor: c.modalBorder,
+    },
+    modalHandle: {
+      width: 36, height: 4, backgroundColor: c.modalHandle,
+      borderRadius: 2, alignSelf: 'center', marginBottom: 14,
+    },
+    modalTitle: { fontSize: 16, fontFamily: 'Poppins_700Bold', color: c.text, marginBottom: 12 },
+    searchWrapper: {
+      flexDirection: 'row', alignItems: 'center', gap: 8,
+      backgroundColor: c.modalSearchBg, borderRadius: 12,
+      paddingHorizontal: 12, marginBottom: 12,
+      borderWidth: 1, borderColor: c.modalSearchBorder,
+    },
+    stateSearch: { flex: 1, color: c.text, paddingVertical: 10, fontSize: 14, fontFamily: 'Poppins_400Regular' },
+    stateOption: {
+      flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+      paddingVertical: 13, borderBottomWidth: 0.5, borderBottomColor: c.stateOptionBorder,
+    },
+    stateText: { color: c.text, fontSize: 15, fontFamily: 'Poppins_400Regular' },
+  });
+}

@@ -4,6 +4,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
+import { useMemo } from 'react';
+import { useTheme } from './ThemeContext';
 
 function formatDate(dateStr) {
   if (!dateStr) return '—';
@@ -31,6 +33,7 @@ function getTimeRemaining(expirationDate) {
 }
 
 export default function VehicleDetailScreen({ route, navigation }) {
+  const { colors } = useTheme();
   const [fontsLoaded] = useFonts({ Poppins_400Regular, Poppins_700Bold });
 
   const permit = route?.params?.permit ?? null;
@@ -39,6 +42,8 @@ export default function VehicleDetailScreen({ route, navigation }) {
   const isActive = permit?.is_active === 1;
   const timer = getTimeRemaining(permit?.expiration_date);
   const timerColor = timer.expired ? '#ff6b6b' : isActive ? '#4cd964' : '#6366f1';
+
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   if (!fontsLoaded) return null;
 
@@ -57,8 +62,8 @@ export default function VehicleDetailScreen({ route, navigation }) {
   ];
 
   return (
-    <LinearGradient colors={['#1a1a2e', '#0d0d0d']} style={styles.container}>
-      <StatusBar style="light" />
+    <LinearGradient colors={[colors.gradientStart, colors.gradientEnd]} style={styles.container}>
+      <StatusBar style={colors.statusBar} />
       <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
         {/* Header */}
         <View style={styles.header}>
@@ -142,7 +147,7 @@ export default function VehicleDetailScreen({ route, navigation }) {
 
           {!permit && (
             <View style={styles.emptyCard}>
-              <Ionicons name="document-outline" size={32} color="rgba(255,255,255,0.2)" />
+              <Ionicons name="document-outline" size={32} color={colors.emptyIcon} />
               <Text style={styles.emptyText}>No active permit.{'\n'}Register this vehicle to protect it.</Text>
               <TouchableOpacity
                 style={styles.registerButton}
@@ -159,180 +164,87 @@ export default function VehicleDetailScreen({ route, navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  safeArea: { flex: 1 },
-  /* Header */
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 12,
-    gap: 12,
-  },
-  backButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
-    backgroundColor: 'rgba(255,255,255,0.07)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.12)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerCenter: { flex: 1 },
-  headerTitle: {
-    color: '#ffffff',
-    fontSize: 20,
-    fontFamily: 'Poppins_700Bold',
-    lineHeight: 26,
-  },
-  headerSubtitle: {
-    color: 'rgba(255,255,255,0.4)',
-    fontSize: 12,
-    fontFamily: 'Poppins_400Regular',
-  },
-  headerBadge: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
-    backgroundColor: 'rgba(99,102,241,0.18)',
-    borderWidth: 1,
-    borderColor: 'rgba(99,102,241,0.35)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  /* Scroll */
-  scroll: { flex: 1 },
-  scrollContent: { paddingHorizontal: 20, paddingBottom: 32, gap: 14 },
-  /* Hero timer card */
-  heroCard: {
-    backgroundColor: 'rgba(255,255,255,0.05)',
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(99,102,241,0.25)',
-    padding: 18,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  heroLeft: { flex: 1 },
-  statusPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 20,
-    alignSelf: 'flex-start',
-    marginBottom: 10,
-  },
-  statusDot: { width: 6, height: 6, borderRadius: 3 },
-  statusText: { fontSize: 11, fontFamily: 'Poppins_700Bold' },
-  heroLabel: {
-    color: 'rgba(255,255,255,0.45)',
-    fontSize: 12,
-    fontFamily: 'Poppins_400Regular',
-  },
-  heroTimer: {
-    fontSize: 34,
-    fontFamily: 'Poppins_700Bold',
-    marginTop: 2,
-  },
-  timerRing: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    borderWidth: 3,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(0,0,0,0.2)',
-  },
-  /* Info card */
-  card: {
-    backgroundColor: 'rgba(255,255,255,0.05)',
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(99,102,241,0.18)',
-    padding: 16,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    marginBottom: 14,
-  },
-  cardIconBadge: {
-    width: 30,
-    height: 30,
-    borderRadius: 9,
-    backgroundColor: 'rgba(99,102,241,0.18)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  cardTitle: {
-    color: '#ffffff',
-    fontSize: 14,
-    fontFamily: 'Poppins_700Bold',
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 11,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.06)',
-    gap: 8,
-  },
-  rowLast: { borderBottomWidth: 0 },
-  rowLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    flex: 1,
-  },
-  rowLabel: {
-    color: 'rgba(255,255,255,0.5)',
-    fontSize: 13,
-    fontFamily: 'Poppins_400Regular',
-  },
-  rowValue: {
-    color: '#ffffff',
-    fontSize: 13,
-    fontFamily: 'Poppins_700Bold',
-    maxWidth: '55%',
-    textAlign: 'right',
-  },
-  /* Empty state */
-  emptyCard: {
-    backgroundColor: 'rgba(255,255,255,0.04)',
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
-    padding: 28,
-    alignItems: 'center',
-    gap: 12,
-  },
-  emptyText: {
-    color: 'rgba(255,255,255,0.4)',
-    fontSize: 13,
-    fontFamily: 'Poppins_400Regular',
-    textAlign: 'center',
-    lineHeight: 20,
-  },
-  registerButton: {
-    backgroundColor: 'rgba(99,102,241,0.25)',
-    borderWidth: 1,
-    borderColor: 'rgba(99,102,241,0.5)',
-    borderRadius: 12,
-    paddingVertical: 10,
-    paddingHorizontal: 24,
-    marginTop: 4,
-  },
-  registerButtonText: {
-    color: '#ffffff',
-    fontSize: 13,
-    fontFamily: 'Poppins_700Bold',
-  },
-});
+function createStyles(c) {
+  return StyleSheet.create({
+    container: { flex: 1 },
+    safeArea: { flex: 1 },
+    /* Header */
+    header: {
+      flexDirection: 'row', alignItems: 'center',
+      paddingHorizontal: 20, paddingTop: 16, paddingBottom: 12, gap: 12,
+    },
+    backButton: {
+      width: 36, height: 36, borderRadius: 12,
+      backgroundColor: c.backBtnBg, borderWidth: 1,
+      borderColor: c.backBtnBorder, alignItems: 'center', justifyContent: 'center',
+    },
+    headerCenter: { flex: 1 },
+    headerTitle: { color: c.text, fontSize: 20, fontFamily: 'Poppins_700Bold', lineHeight: 26 },
+    headerSubtitle: { color: c.textSecondary, fontSize: 12, fontFamily: 'Poppins_400Regular' },
+    headerBadge: {
+      width: 38, height: 38, borderRadius: 12,
+      backgroundColor: c.headerBadgeBg, borderWidth: 1,
+      borderColor: c.headerBadgeBorder, alignItems: 'center', justifyContent: 'center',
+    },
+    /* Scroll */
+    scroll: { flex: 1 },
+    scrollContent: { paddingHorizontal: 20, paddingBottom: 32, gap: 14 },
+    /* Hero timer card */
+    heroCard: {
+      backgroundColor: c.surface, borderRadius: 20, borderWidth: 1,
+      borderColor: c.border, padding: 18, flexDirection: 'row',
+      alignItems: 'center', justifyContent: 'space-between',
+    },
+    heroLeft: { flex: 1 },
+    statusPill: {
+      flexDirection: 'row', alignItems: 'center', gap: 5,
+      paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20,
+      alignSelf: 'flex-start', marginBottom: 10,
+    },
+    statusDot: { width: 6, height: 6, borderRadius: 3 },
+    statusText: { fontSize: 11, fontFamily: 'Poppins_700Bold' },
+    heroLabel: { color: c.textSecondary, fontSize: 12, fontFamily: 'Poppins_400Regular' },
+    heroTimer: { fontSize: 34, fontFamily: 'Poppins_700Bold', marginTop: 2 },
+    timerRing: {
+      width: 70, height: 70, borderRadius: 35, borderWidth: 3,
+      alignItems: 'center', justifyContent: 'center', backgroundColor: c.timerRingBg,
+    },
+    /* Info card */
+    card: {
+      backgroundColor: c.surface, borderRadius: 20, borderWidth: 1,
+      borderColor: c.border, padding: 16,
+    },
+    cardHeader: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 14 },
+    cardIconBadge: {
+      width: 30, height: 30, borderRadius: 9,
+      backgroundColor: c.cardBadgePrimary, alignItems: 'center', justifyContent: 'center',
+    },
+    cardTitle: { color: c.text, fontSize: 14, fontFamily: 'Poppins_700Bold' },
+    row: {
+      flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+      paddingVertical: 11, borderBottomWidth: 1, borderBottomColor: c.borderSubtle, gap: 8,
+    },
+    rowLast: { borderBottomWidth: 0 },
+    rowLeft: { flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1 },
+    rowLabel: { color: c.textSecondary, fontSize: 13, fontFamily: 'Poppins_400Regular' },
+    rowValue: {
+      color: c.text, fontSize: 13, fontFamily: 'Poppins_700Bold',
+      maxWidth: '55%', textAlign: 'right',
+    },
+    /* Empty state */
+    emptyCard: {
+      backgroundColor: c.surfaceSub, borderRadius: 20, borderWidth: 1,
+      borderColor: c.borderWeak, padding: 28, alignItems: 'center', gap: 12,
+    },
+    emptyText: {
+      color: c.textSecondary, fontSize: 13, fontFamily: 'Poppins_400Regular',
+      textAlign: 'center', lineHeight: 20,
+    },
+    registerButton: {
+      backgroundColor: 'rgba(99,102,241,0.25)', borderWidth: 1,
+      borderColor: 'rgba(99,102,241,0.5)', borderRadius: 12,
+      paddingVertical: 10, paddingHorizontal: 24, marginTop: 4,
+    },
+    registerButtonText: { color: '#ffffff', fontSize: 13, fontFamily: 'Poppins_700Bold' },
+  });
+}

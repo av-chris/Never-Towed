@@ -12,8 +12,9 @@ import { useFonts, Poppins_400Regular, Poppins_700Bold } from '@expo-google-font
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSQLiteContext } from 'expo-sqlite';
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
+import { useTheme } from './ThemeContext';
 
 function getTimeRemaining(expirationDate) {
   if (!expirationDate) return { label: '24:00', expired: false, hasPermit: false };
@@ -55,6 +56,7 @@ function findVehicleForPermit(vehicles, permit) {
 
 export default function HomeScreen({ navigation }) {
   const { width } = useWindowDimensions();
+  const { colors } = useTheme();
   const db = useSQLiteContext();
   const [vehicles, setVehicles] = useState([]);
   const [permits, setPermits] = useState([]);
@@ -87,6 +89,7 @@ export default function HomeScreen({ navigation }) {
   );
 
   const [fontsLoaded] = useFonts({ Poppins_400Regular, Poppins_700Bold });
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   if (!fontsLoaded) return null;
 
@@ -122,16 +125,16 @@ export default function HomeScreen({ navigation }) {
       : 'Not registered';
 
   const statusColor = timer.expired
-    ? 'rgba(255, 107, 107, 0.15)'
+    ? 'rgba(255,107,107,0.15)'
     : activePermit
-      ? 'rgba(76, 217, 100, 0.15)'
-      : 'rgba(255,255,255,0.08)';
+      ? 'rgba(76,217,100,0.15)'
+      : colors.surface;
 
   const statusTextColor = timer.expired ? '#ff6b6b' : activePermit ? '#4cd964' : '#8e8e93';
 
   return (
-    <LinearGradient colors={['#1a1a2e', '#0d0d0d']} style={styles.container}>
-      <StatusBar style="light" />
+    <LinearGradient colors={[colors.gradientStart, colors.gradientEnd]} style={styles.container}>
+      <StatusBar style={colors.statusBar} />
       <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
         <View style={styles.dashboard}>
           {/* Header */}
@@ -219,7 +222,7 @@ export default function HomeScreen({ navigation }) {
               >
                 {vehicles.length === 0 ? (
                   <View style={styles.emptyState}>
-                    <Ionicons name="car-outline" size={28} color="rgba(255,255,255,0.2)" />
+                    <Ionicons name="car-outline" size={28} color={colors.emptyIcon} />
                     <Text style={styles.emptyText}>Save your car to register in one tap</Text>
                   </View>
                 ) : (
@@ -242,7 +245,7 @@ export default function HomeScreen({ navigation }) {
                             {vehicle.make} · {vehicle.model}
                           </Text>
                         </View>
-                        <Ionicons name="chevron-forward" size={12} color="rgba(255,255,255,0.2)" />
+                        <Ionicons name="chevron-forward" size={12} color={colors.emptyIcon} />
                       </View>
                     </TouchableOpacity>
                   ))
@@ -270,7 +273,7 @@ export default function HomeScreen({ navigation }) {
               >
                 {permits.length === 0 ? (
                   <View style={styles.emptyState}>
-                    <Ionicons name="document-text-outline" size={28} color="rgba(255,255,255,0.2)" />
+                    <Ionicons name="document-text-outline" size={28} color={colors.emptyIcon} />
                     <Text style={styles.emptyText}>Your past registrations will appear here</Text>
                   </View>
                 ) : (
@@ -299,7 +302,7 @@ export default function HomeScreen({ navigation }) {
                               {formatHistoryDate(permit.issue_date)} · {permit.make} {permit.model}
                             </Text>
                           </View>
-                          <Ionicons name="chevron-forward" size={12} color="rgba(255,255,255,0.2)" />
+                          <Ionicons name="chevron-forward" size={12} color={colors.emptyIcon} />
                         </View>
                       </TouchableOpacity>
                     );
@@ -315,244 +318,97 @@ export default function HomeScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  safeArea: {
-    flex: 1,
-  },
-  dashboard: {
-    flex: 1,
-    paddingHorizontal: 16,
-    paddingTop: 8,
-    gap: 12,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 4,
-  },
-  greeting: {
-    fontSize: 26,
-    fontFamily: 'Poppins_700Bold',
-    color: '#ffffff',
-    letterSpacing: -0.5,
-  },
-  subGreeting: {
-    fontSize: 13,
-    fontFamily: 'Poppins_400Regular',
-    color: 'rgba(255,255,255,0.5)',
-    marginTop: 2,
-  },
-  headerIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
-    backgroundColor: 'rgba(99, 102, 241, 0.15)',
-    borderWidth: 1,
-    borderColor: 'rgba(99, 102, 241, 0.25)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  currentCard: {
-    borderRadius: 22,
-    padding: 18,
-    backgroundColor: 'rgba(255,255,255,0.05)',
-    borderWidth: 1,
-    borderColor: 'rgba(99, 102, 241, 0.25)',
-  },
-  bottomRow: {
-    flex: 1,
-    flexDirection: 'row',
-    gap: 12,
-    minHeight: 0,
-  },
-  sideCard: {
-    flex: 1,
-    borderRadius: 20,
-    padding: 14,
-    backgroundColor: 'rgba(255,255,255,0.03)',
-    borderWidth: 1,
-    minHeight: 0,
-  },
-  savedCard: {
-    borderColor: 'rgba(196, 181, 253, 0.2)',
-  },
-  historyCard: {
-    borderColor: 'rgba(251, 191, 36, 0.15)',
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-  },
-  cardTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    flex: 1,
-  },
-  cardIconBadge: {
-    width: 28,
-    height: 28,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  currentBadge: {
-    backgroundColor: 'rgba(99, 102, 241, 0.2)',
-  },
-  savedBadge: {
-    backgroundColor: 'rgba(196, 181, 253, 0.15)',
-  },
-  historyBadge: {
-    backgroundColor: 'rgba(251, 191, 36, 0.12)',
-  },
-  cardTitle: {
-    fontSize: 13,
-    fontFamily: 'Poppins_700Bold',
-    color: '#ffffff',
-  },
-  cardCount: {
-    fontSize: 12,
-    fontFamily: 'Poppins_700Bold',
-    color: 'rgba(255,255,255,0.35)',
-  },
-  statusPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 20,
-  },
-  statusDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-  },
-  statusText: {
-    fontSize: 11,
-    fontFamily: 'Poppins_700Bold',
-  },
-  currentBody: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  currentInfo: {
-    flex: 1,
-    paddingRight: 12,
-  },
-  vehicleName: {
-    fontSize: 22,
-    fontFamily: 'Poppins_700Bold',
-    color: '#ffffff',
-    marginBottom: 4,
-  },
-  vehicleDetail: {
-    fontSize: 14,
-    fontFamily: 'Poppins_400Regular',
-    color: 'rgba(255,255,255,0.6)',
-    marginBottom: 8,
-  },
-  plateRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-  },
-  plateText: {
-    fontSize: 12,
-    fontFamily: 'Poppins_400Regular',
-    color: '#8e8e93',
-  },
-  timerRing: {
-    borderWidth: 5,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.2)',
-  },
-  timerText: {
-    color: '#ffffff',
-    fontFamily: 'Poppins_700Bold',
-    fontSize: 18,
-  },
-  timerLabel: {
-    color: '#8e8e93',
-    fontFamily: 'Poppins_400Regular',
-    fontSize: 10,
-    marginTop: 2,
-  },
-  cardScroll: {
-    flex: 1,
-  },
-  cardScrollContent: {
-    flexGrow: 1,
-    paddingBottom: 4,
-  },
-  listItem: {
-    backgroundColor: 'rgba(255,255,255,0.05)',
-    borderRadius: 12,
-    padding: 10,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.06)',
-  },
-  listItemRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  listItemIcon: {
-    width: 24,
-    height: 24,
-    borderRadius: 7,
-    backgroundColor: 'rgba(196,181,253,0.12)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  listItemIconActive: {
-    backgroundColor: 'rgba(76,217,100,0.12)',
-  },
-  listItemTitle: {
-    color: '#ffffff',
-    fontFamily: 'Poppins_700Bold',
-    fontSize: 12,
-  },
-  listItemSub: {
-    color: 'rgba(255,255,255,0.45)',
-    fontFamily: 'Poppins_400Regular',
-    fontSize: 11,
-    marginTop: 2,
-  },
-  historyItemTop: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 6,
-  },
-  activeDot: {
-    width: 7,
-    height: 7,
-    borderRadius: 4,
-    backgroundColor: '#4cd964',
-  },
-  emptyState: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 24,
-    paddingHorizontal: 8,
-    gap: 10,
-  },
-  emptyText: {
-    fontSize: 12,
-    fontFamily: 'Poppins_400Regular',
-    color: 'rgba(255,255,255,0.35)',
-    textAlign: 'center',
-    lineHeight: 18,
-  },
-});
+function createStyles(c) {
+  return StyleSheet.create({
+    container: { flex: 1 },
+    safeArea: { flex: 1 },
+    dashboard: { flex: 1, paddingHorizontal: 16, paddingTop: 8, gap: 12 },
+    header: {
+      flexDirection: 'row', alignItems: 'center',
+      justifyContent: 'space-between', marginBottom: 4,
+    },
+    greeting: {
+      fontSize: 26, fontFamily: 'Poppins_700Bold',
+      color: c.text, letterSpacing: -0.5,
+    },
+    subGreeting: {
+      fontSize: 13, fontFamily: 'Poppins_400Regular',
+      color: c.textSecondary, marginTop: 2,
+    },
+    headerIcon: {
+      width: 44, height: 44, borderRadius: 14,
+      backgroundColor: c.headerBadgeBg, borderWidth: 1,
+      borderColor: c.headerBadgeBorder, alignItems: 'center', justifyContent: 'center',
+    },
+    currentCard: {
+      borderRadius: 22, padding: 18,
+      backgroundColor: c.surface, borderWidth: 1, borderColor: c.border,
+    },
+    bottomRow: { flex: 1, flexDirection: 'row', gap: 12, minHeight: 0 },
+    sideCard: {
+      flex: 1, borderRadius: 20, padding: 14,
+      backgroundColor: c.surfaceSub, borderWidth: 1, minHeight: 0,
+    },
+    savedCard: { borderColor: c.cardBadgePurple },
+    historyCard: { borderColor: c.cardBadgeAmber },
+    cardHeader: {
+      flexDirection: 'row', alignItems: 'center',
+      justifyContent: 'space-between', marginBottom: 12,
+    },
+    cardTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1 },
+    cardIconBadge: { width: 28, height: 28, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
+    currentBadge: { backgroundColor: c.cardBadgePrimary },
+    savedBadge: { backgroundColor: c.cardBadgePurple },
+    historyBadge: { backgroundColor: c.cardBadgeAmber },
+    cardTitle: { fontSize: 13, fontFamily: 'Poppins_700Bold', color: c.text },
+    cardCount: { fontSize: 12, fontFamily: 'Poppins_700Bold', color: c.textMuted },
+    statusPill: {
+      flexDirection: 'row', alignItems: 'center', gap: 5,
+      paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20,
+    },
+    statusDot: { width: 6, height: 6, borderRadius: 3 },
+    statusText: { fontSize: 11, fontFamily: 'Poppins_700Bold' },
+    currentBody: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+    currentInfo: { flex: 1, paddingRight: 12 },
+    vehicleName: { fontSize: 22, fontFamily: 'Poppins_700Bold', color: c.text, marginBottom: 4 },
+    vehicleDetail: {
+      fontSize: 14, fontFamily: 'Poppins_400Regular',
+      color: c.textSecondary, marginBottom: 8,
+    },
+    plateRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+    plateText: { fontSize: 12, fontFamily: 'Poppins_400Regular', color: c.textSecondary },
+    timerRing: {
+      borderWidth: 5, justifyContent: 'center',
+      alignItems: 'center', backgroundColor: c.timerRingBg,
+    },
+    timerText: { color: c.text, fontFamily: 'Poppins_700Bold', fontSize: 18 },
+    timerLabel: { color: c.textSecondary, fontFamily: 'Poppins_400Regular', fontSize: 10, marginTop: 2 },
+    cardScroll: { flex: 1 },
+    cardScrollContent: { flexGrow: 1, paddingBottom: 4 },
+    listItem: {
+      backgroundColor: c.surface, borderRadius: 12, padding: 10,
+      marginBottom: 8, borderWidth: 1, borderColor: c.borderSubtle,
+    },
+    listItemRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    listItemIcon: {
+      width: 24, height: 24, borderRadius: 7,
+      backgroundColor: c.cardBadgePurple, alignItems: 'center', justifyContent: 'center',
+    },
+    listItemIconActive: { backgroundColor: c.cardBadgeGreen },
+    listItemTitle: { color: c.text, fontFamily: 'Poppins_700Bold', fontSize: 12 },
+    listItemSub: { color: c.textSecondary, fontFamily: 'Poppins_400Regular', fontSize: 11, marginTop: 2 },
+    historyItemTop: {
+      flexDirection: 'row', alignItems: 'center',
+      justifyContent: 'space-between', gap: 6,
+    },
+    activeDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: '#4cd964' },
+    emptyState: {
+      flex: 1, alignItems: 'center', justifyContent: 'center',
+      paddingVertical: 24, paddingHorizontal: 8, gap: 10,
+    },
+    emptyText: {
+      fontSize: 12, fontFamily: 'Poppins_400Regular',
+      color: c.textMuted, textAlign: 'center', lineHeight: 18,
+    },
+  });
+}

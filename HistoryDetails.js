@@ -5,6 +5,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useSQLiteContext } from 'expo-sqlite';
+import { useMemo } from 'react';
+import { useTheme } from './ThemeContext';
 
 function formatDate(dateStr) {
   if (!dateStr) return '—';
@@ -20,6 +22,7 @@ function formatDate(dateStr) {
 }
 
 export default function HistoryDetail({ route, navigation }) {
+  const { colors } = useTheme();
   const [fontsLoaded] = useFonts({ Poppins_400Regular, Poppins_700Bold });
   const db = useSQLiteContext();
 
@@ -55,6 +58,8 @@ export default function HistoryDetail({ route, navigation }) {
     );
   };
 
+  const styles = useMemo(() => createStyles(colors), [colors]);
+
   if (!fontsLoaded) return null;
 
   const rows = [
@@ -68,8 +73,8 @@ export default function HistoryDetail({ route, navigation }) {
   ];
 
   return (
-    <LinearGradient colors={['#1a1a2e', '#0d0d0d']} style={styles.container}>
-      <StatusBar style="light" />
+    <LinearGradient colors={[colors.gradientStart, colors.gradientEnd]} style={styles.container}>
+      <StatusBar style={colors.statusBar} />
       <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
         {/* Header */}
         <View style={styles.header}>
@@ -126,124 +131,62 @@ export default function HistoryDetail({ route, navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  safeArea: { flex: 1 },
-  /* Header */
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 12,
-    gap: 12,
-  },
-  backButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
-    backgroundColor: 'rgba(255,255,255,0.07)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.12)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerCenter: { flex: 1 },
-  headerTitle: {
-    color: '#ffffff',
-    fontSize: 20,
-    fontFamily: 'Poppins_700Bold',
-    lineHeight: 26,
-  },
-  headerSubtitle: {
-    color: 'rgba(255,255,255,0.4)',
-    fontSize: 12,
-    fontFamily: 'Poppins_400Regular',
-  },
-  statusPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 20,
-  },
-  statusDot: { width: 6, height: 6, borderRadius: 3 },
-  statusText: { fontSize: 11, fontFamily: 'Poppins_700Bold' },
-  /* Scroll */
-  scroll: { flex: 1 },
-  scrollContent: { paddingHorizontal: 20, paddingBottom: 32, gap: 14 },
-  /* Card */
-  card: {
-    backgroundColor: 'rgba(255,255,255,0.05)',
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(251,191,36,0.2)',
-    padding: 16,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    marginBottom: 14,
-  },
-  cardIconBadge: {
-    width: 30,
-    height: 30,
-    borderRadius: 9,
-    backgroundColor: 'rgba(251,191,36,0.12)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  cardTitle: {
-    color: '#ffffff',
-    fontSize: 14,
-    fontFamily: 'Poppins_700Bold',
-  },
-  /* Rows */
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 11,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.06)',
-    gap: 8,
-  },
-  rowLast: { borderBottomWidth: 0 },
-  rowLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    flex: 1,
-  },
-  rowLabel: {
-    color: 'rgba(255,255,255,0.5)',
-    fontSize: 13,
-    fontFamily: 'Poppins_400Regular',
-  },
-  rowValue: {
-    color: '#ffffff',
-    fontSize: 13,
-    fontFamily: 'Poppins_700Bold',
-    maxWidth: '55%',
-    textAlign: 'right',
-  },
-  /* Delete */
-  deleteButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    backgroundColor: 'rgba(248,113,113,0.1)',
-    borderWidth: 1,
-    borderColor: 'rgba(248,113,113,0.3)',
-    borderRadius: 16,
-    paddingVertical: 14,
-  },
-  deleteText: {
-    color: '#f87171',
-    fontSize: 15,
-    fontFamily: 'Poppins_700Bold',
-  },
-});
+function createStyles(c) {
+  return StyleSheet.create({
+    container: { flex: 1 },
+    safeArea: { flex: 1 },
+    /* Header */
+    header: {
+      flexDirection: 'row', alignItems: 'center',
+      paddingHorizontal: 20, paddingTop: 16, paddingBottom: 12, gap: 12,
+    },
+    backButton: {
+      width: 36, height: 36, borderRadius: 12,
+      backgroundColor: c.backBtnBg, borderWidth: 1,
+      borderColor: c.backBtnBorder, alignItems: 'center', justifyContent: 'center',
+    },
+    headerCenter: { flex: 1 },
+    headerTitle: { color: c.text, fontSize: 20, fontFamily: 'Poppins_700Bold', lineHeight: 26 },
+    headerSubtitle: { color: c.textSecondary, fontSize: 12, fontFamily: 'Poppins_400Regular' },
+    statusPill: {
+      flexDirection: 'row', alignItems: 'center', gap: 5,
+      paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20,
+    },
+    statusDot: { width: 6, height: 6, borderRadius: 3 },
+    statusText: { fontSize: 11, fontFamily: 'Poppins_700Bold' },
+    /* Scroll */
+    scroll: { flex: 1 },
+    scrollContent: { paddingHorizontal: 20, paddingBottom: 32, gap: 14 },
+    /* Card */
+    card: {
+      backgroundColor: c.surface, borderRadius: 20, borderWidth: 1,
+      borderColor: c.cardBadgeAmber, padding: 16,
+    },
+    cardHeader: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 14 },
+    cardIconBadge: {
+      width: 30, height: 30, borderRadius: 9,
+      backgroundColor: c.cardBadgeAmber, alignItems: 'center', justifyContent: 'center',
+    },
+    cardTitle: { color: c.text, fontSize: 14, fontFamily: 'Poppins_700Bold' },
+    /* Rows */
+    row: {
+      flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+      paddingVertical: 11, borderBottomWidth: 1, borderBottomColor: c.borderSubtle, gap: 8,
+    },
+    rowLast: { borderBottomWidth: 0 },
+    rowLeft: { flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1 },
+    rowLabel: { color: c.textSecondary, fontSize: 13, fontFamily: 'Poppins_400Regular' },
+    rowValue: {
+      color: c.text, fontSize: 13, fontFamily: 'Poppins_700Bold',
+      maxWidth: '55%', textAlign: 'right',
+    },
+    /* Delete */
+    deleteButton: {
+      flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+      gap: 8, backgroundColor: 'rgba(248,113,113,0.1)',
+      borderWidth: 1, borderColor: 'rgba(248,113,113,0.3)',
+      borderRadius: 16, paddingVertical: 14,
+    },
+    deleteText: { color: '#f87171', fontSize: 15, fontFamily: 'Poppins_700Bold' },
+  });
+}

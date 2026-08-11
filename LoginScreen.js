@@ -15,15 +15,18 @@ import { useFonts, Poppins_400Regular, Poppins_700Bold } from '@expo-google-font
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { BASE_URL } from './config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useTheme } from './ThemeContext';
 
 export default function LoginScreen({ navigation }) {
+  const { colors } = useTheme();
   const [fontsLoaded] = useFonts({ Poppins_400Regular, Poppins_700Bold });
   const [Email, setEmail] = useState('');
   const [Password, setPassword] = useState('');
   const [focusedField, setFocusedField] = useState(null);
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const handleAuthLogic = async () => {
     try {
@@ -53,8 +56,8 @@ export default function LoginScreen({ navigation }) {
   if (!fontsLoaded) return null;
 
   return (
-    <LinearGradient colors={['#1a1a2e', '#0d0d0d']} style={styles.container}>
-      <StatusBar style="light" />
+    <LinearGradient colors={[colors.gradientStart, colors.gradientEnd]} style={styles.container}>
+      <StatusBar style={colors.statusBar} />
 
       {/* Ambient background accents */}
       <View style={styles.glowTop} />
@@ -76,7 +79,7 @@ export default function LoginScreen({ navigation }) {
           </View>
 
           {/* Login card */}
-          <BlurView intensity={35} tint="dark" style={styles.loginBox}>
+          <BlurView intensity={35} tint={colors.tabBarTint} style={styles.loginBox}>
             <Text style={styles.cardTitle}>Welcome back</Text>
             <Text style={styles.cardSubtitle}>Sign in to manage your vehicles</Text>
 
@@ -91,14 +94,14 @@ export default function LoginScreen({ navigation }) {
                 <Ionicons
                   name="person-outline"
                   size={20}
-                  color={focusedField === 'email' ? '#a5b4fc' : 'rgba(255,255,255,0.45)'}
+                  color={focusedField === 'email' ? '#a5b4fc' : colors.textSecondary}
                   style={styles.inputIcon}
                 />
                 <TextInput
                   value={Email}
                   style={styles.input}
                   placeholder="Enter your username"
-                  placeholderTextColor="rgba(255,255,255,0.35)"
+                  placeholderTextColor={colors.textPlaceholder}
                   onChangeText={(text) => setEmail(text)}
                   onFocus={() => setFocusedField('email')}
                   onBlur={() => setFocusedField(null)}
@@ -119,14 +122,14 @@ export default function LoginScreen({ navigation }) {
                 <Ionicons
                   name="lock-closed-outline"
                   size={20}
-                  color={focusedField === 'password' ? '#a5b4fc' : 'rgba(255,255,255,0.45)'}
+                  color={focusedField === 'password' ? '#a5b4fc' : colors.textSecondary}
                   style={styles.inputIcon}
                 />
                 <TextInput
                   value={Password}
                   style={styles.input}
                   placeholder="Enter your password"
-                  placeholderTextColor="rgba(255,255,255,0.35)"
+                  placeholderTextColor={colors.textPlaceholder}
                   secureTextEntry
                   onChangeText={setPassword}
                   onFocus={() => setFocusedField('password')}
@@ -159,148 +162,66 @@ export default function LoginScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#000000',
-  },
-  flex: {
-    flex: 1,
-  },
-  glowTop: {
-    position: 'absolute',
-    top: -80,
-    right: -60,
-    width: 260,
-    height: 260,
-    borderRadius: 130,
-    backgroundColor: 'rgba(99, 102, 241, 0.18)',
-  },
-  glowBottom: {
-    position: 'absolute',
-    bottom: 40,
-    left: -80,
-    width: 220,
-    height: 220,
-    borderRadius: 110,
-    backgroundColor: 'rgba(99, 102, 241, 0.1)',
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    paddingHorizontal: 24,
-  },
-  brandSection: {
-    alignItems: 'center',
-    marginBottom: 36,
-  },
-  logoBadge: {
-    width: 64,
-    height: 64,
-    borderRadius: 20,
-    backgroundColor: 'rgba(99, 102, 241, 0.2)',
-    borderWidth: 1,
-    borderColor: 'rgba(99, 102, 241, 0.35)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 16,
-  },
-  headerText: {
-    fontSize: 34,
-    fontFamily: 'Poppins_700Bold',
-    color: '#ffffff',
-    letterSpacing: -0.5,
-  },
-  tagline: {
-    fontSize: 15,
-    fontFamily: 'Poppins_400Regular',
-    color: 'rgba(255,255,255,0.55)',
-    marginTop: 6,
-  },
-  loginBox: {
-    borderRadius: 24,
-    overflow: 'hidden',
-    padding: 28,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.12)',
-    backgroundColor: 'rgba(255,255,255,0.04)',
-  },
-  cardTitle: {
-    fontSize: 22,
-    fontFamily: 'Poppins_700Bold',
-    color: '#ffffff',
-    marginBottom: 4,
-  },
-  cardSubtitle: {
-    fontSize: 14,
-    fontFamily: 'Poppins_400Regular',
-    color: 'rgba(255,255,255,0.5)',
-    marginBottom: 28,
-  },
-  inputGroup: {
-    marginBottom: 18,
-  },
-  inputLabel: {
-    fontSize: 13,
-    fontFamily: 'Poppins_400Regular',
-    color: 'rgba(255,255,255,0.65)',
-    marginBottom: 8,
-    marginLeft: 4,
-  },
-  inputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.07)',
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
-    paddingHorizontal: 14,
-  },
-  inputWrapperFocused: {
-    borderColor: 'rgba(99, 102, 241, 0.6)',
-    backgroundColor: 'rgba(99, 102, 241, 0.08)',
-  },
-  inputIcon: {
-    marginRight: 10,
-  },
-  input: {
-    flex: 1,
-    color: '#ffffff',
-    paddingVertical: 15,
-    fontSize: 15,
-    fontFamily: 'Poppins_400Regular',
-  },
-  signInButton: {
-    marginTop: 10,
-    borderRadius: 14,
-    overflow: 'hidden',
-    shadowColor: '#6366f1',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.35,
-    shadowRadius: 16,
-    elevation: 8,
-  },
-  signInButtonPressed: {
-    opacity: 0.88,
-    transform: [{ scale: 0.98 }],
-  },
-  signInGradient: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 16,
-    gap: 8,
-  },
-  signInText: {
-    color: '#ffffff',
-    fontFamily: 'Poppins_700Bold',
-    fontSize: 16,
-  },
-  footerText: {
-    textAlign: 'center',
-    fontSize: 13,
-    fontFamily: 'Poppins_400Regular',
-    color: 'rgba(255,255,255,0.3)',
-    marginTop: 28,
-  },
-});
+function createStyles(c) {
+  return StyleSheet.create({
+    container: { flex: 1 },
+    flex: { flex: 1 },
+    glowTop: {
+      position: 'absolute', top: -80, right: -60,
+      width: 260, height: 260, borderRadius: 130,
+      backgroundColor: 'rgba(99,102,241,0.18)',
+    },
+    glowBottom: {
+      position: 'absolute', bottom: 40, left: -80,
+      width: 220, height: 220, borderRadius: 110,
+      backgroundColor: 'rgba(99,102,241,0.1)',
+    },
+    content: { flex: 1, justifyContent: 'center', paddingHorizontal: 24 },
+    brandSection: { alignItems: 'center', marginBottom: 36 },
+    logoBadge: {
+      width: 64, height: 64, borderRadius: 20,
+      backgroundColor: c.cardBadgePrimary, borderWidth: 1,
+      borderColor: c.headerBadgeBorder, alignItems: 'center',
+      justifyContent: 'center', marginBottom: 16,
+    },
+    headerText: { fontSize: 34, fontFamily: 'Poppins_700Bold', color: c.text, letterSpacing: -0.5 },
+    tagline: { fontSize: 15, fontFamily: 'Poppins_400Regular', color: c.textSecondary, marginTop: 6 },
+    loginBox: {
+      borderRadius: 24, overflow: 'hidden', padding: 28,
+      borderWidth: 1, borderColor: c.borderWeak, backgroundColor: c.surface,
+    },
+    cardTitle: { fontSize: 22, fontFamily: 'Poppins_700Bold', color: c.text, marginBottom: 4 },
+    cardSubtitle: { fontSize: 14, fontFamily: 'Poppins_400Regular', color: c.textSecondary, marginBottom: 28 },
+    inputGroup: { marginBottom: 18 },
+    inputLabel: {
+      fontSize: 13, fontFamily: 'Poppins_400Regular',
+      color: c.textSecondary, marginBottom: 8, marginLeft: 4,
+    },
+    inputWrapper: {
+      flexDirection: 'row', alignItems: 'center',
+      backgroundColor: c.surfaceInput, borderRadius: 14,
+      borderWidth: 1, borderColor: c.borderWeak, paddingHorizontal: 14,
+    },
+    inputWrapperFocused: {
+      borderColor: 'rgba(99,102,241,0.6)',
+      backgroundColor: 'rgba(99,102,241,0.08)',
+    },
+    inputIcon: { marginRight: 10 },
+    input: { flex: 1, color: c.text, paddingVertical: 15, fontSize: 15, fontFamily: 'Poppins_400Regular' },
+    signInButton: {
+      marginTop: 10, borderRadius: 14, overflow: 'hidden',
+      shadowColor: '#6366f1', shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.35, shadowRadius: 16, elevation: 8,
+    },
+    signInButtonPressed: { opacity: 0.88, transform: [{ scale: 0.98 }] },
+    signInGradient: {
+      flexDirection: 'row', alignItems: 'center',
+      justifyContent: 'center', paddingVertical: 16, gap: 8,
+    },
+    signInText: { color: '#ffffff', fontFamily: 'Poppins_700Bold', fontSize: 16 },
+    footerText: {
+      textAlign: 'center', fontSize: 13, fontFamily: 'Poppins_400Regular',
+      color: c.textMuted, marginTop: 28,
+    },
+  });
+}
