@@ -66,7 +66,7 @@ export default function SettingsScreen({ navigation }) {
       <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+          <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate('Home')}>
             <Ionicons name="chevron-back" size={20} color="#ffffff" />
           </TouchableOpacity>
           <View style={styles.headerCenter}>

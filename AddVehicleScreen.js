@@ -166,7 +166,7 @@ export default function AddVehicle({ navigation }) {
           >
             {/* Header */}
             <View style={styles.header}>
-              <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+              <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate('Home')}>
                 <Ionicons name="chevron-back" size={24} color="#ffffff" />
               </TouchableOpacity>
               <View style={styles.headerTextGroup}>
