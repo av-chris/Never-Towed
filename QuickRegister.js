@@ -2,15 +2,13 @@ import { StyleSheet, Text, View, TouchableOpacity, TextInput, Modal, FlatList, K
 import { useFonts, Poppins_400Regular, Poppins_700Bold } from '@expo-google-fonts/poppins';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback} from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { useSQLiteContext } from 'expo-sqlite';
 import { BASE_URL } from './config';
-import { useTheme } from './ThemeContext';
 
 
 export default function QuickRegister({ navigation, route }) {
-  const { colors } = useTheme();
     const [fontsLoaded] = useFonts({ Poppins_400Regular, Poppins_700Bold });
 
   // Access the SQLite database provided by SQLiteProvider in App.js
@@ -110,12 +108,10 @@ catch(error){
 };
 }
 
-  const styles = useMemo(() => createStyles(colors), [colors]);
-
   if (!fontsLoaded) return null;
 
   return (
-    <LinearGradient colors={[colors.gradientStart, colors.gradientEnd]} style={styles.container}>
+    <LinearGradient colors={['#1a1a2e', '#0d0d0d']} style={styles.container}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -138,7 +134,7 @@ catch(error){
                 value={form.nickname}
                 onChangeText = {(text) => setform({...form, nickname: text})}
                 placeholder="NickName - Optional"
-                placeholderTextColor={colors.textPlaceholder}
+                placeholderTextColor="rgba(255,255,255,0.6)"
               />
 
               {/* License Plate */}
@@ -148,7 +144,7 @@ catch(error){
                 value={form.licence_plate}
                 onChangeText = {(text) => setform({...form, licence_plate: text})}
                 placeholder="License Plate"
-                placeholderTextColor={colors.textPlaceholder}
+                placeholderTextColor="rgba(255,255,255,0.6)"
               />
 
               {/* State */}
@@ -157,7 +153,7 @@ catch(error){
                   <Text style={selectedState ? styles.StateSelected : styles.StatePlaceholder}>
                       {selectedState ? selectedState : 'License State'}
                   </Text>
-                  <Ionicons name="chevron-forward" size={20} color={colors.chevron} />
+                  <Ionicons name="chevron-forward" size={20} color="rgba(255,255,255,0.6)" />
                 </View>
               </TouchableOpacity>
 <Modal visible={statePickerOpen} transparent animationType="slide">
@@ -173,7 +169,7 @@ catch(error){
       <TextInput
         style={styles.stateSearch}
         placeholder="Search state..."
-        placeholderTextColor={colors.textPlaceholder}
+        placeholderTextColor="rgba(255,255,255,0.4)"
         value={stateSearch}
         onChangeText={setStateSearch}
       />
@@ -205,7 +201,7 @@ catch(error){
                 value={form.make}
                 onChangeText = {(text) => setform({...form, make: text})}
                 placeholder="Make"
-                placeholderTextColor={colors.textPlaceholder}
+                placeholderTextColor="rgba(255,255,255,0.6)"
               />
 
               {/* Model */}
@@ -215,7 +211,7 @@ catch(error){
                 value={form.model}
                 onChangeText = {(text) => setform({...form, model: text})}
                 placeholder="Model"
-                placeholderTextColor={colors.textPlaceholder}
+                placeholderTextColor="rgba(255,255,255,0.6)"
               />
 
               {/* Color */}
@@ -225,7 +221,7 @@ catch(error){
                 value={form.color}
                 onChangeText = {(text) => setform({...form, color: text})}
                 placeholder="Color"
-                placeholderTextColor={colors.textPlaceholder}
+                placeholderTextColor="rgba(255,255,255,0.6)"
               />
 
             {/* Save Vehicle */}
@@ -265,68 +261,181 @@ catch(error){
         
 
 
-function createStyles(c) {
-  return StyleSheet.create({
-  container: { flex: 1 },
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   MainScreen: {
-    marginTop: 60, borderWidth: 2,
-    borderColor: c.borderWeak, backgroundColor: c.surfaceSub,
-    margin: 20, borderRadius: 20, paddingVertical: 10,
+    marginTop: 60,
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.15)',
+    backgroundColor: 'rgba(255,255,255,0.02)',
+    margin: 20,
+    borderRadius: 20,
+    paddingVertical: 10,
   },
   Header: {
-    justifyContent: 'center', alignItems: 'center', paddingVertical: 16,
-    borderBottomWidth: 0.3, borderBottomColor: c.borderSubtle, position: 'relative',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 16,
+    borderBottomWidth: 0.3,
+    borderBottomColor: 'rgba(255,255,255,0.1)',
+    position: 'relative',
   },
-  BackButton: { position: 'absolute', left: 15, zIndex: 1 },
-  HeaderText: { color: c.text, fontSize: 30, fontFamily: 'Poppins_400Regular' },
-  MainContent: { paddingTop: 10, paddingHorizontal: 10 },
+  BackButton: {
+    position: 'absolute',
+    left: 15,
+    zIndex: 1,
+  },
+  HeaderText: {
+    color: '#ffffff',
+    fontSize: 30,
+    fontFamily: 'Poppins_400Regular',
+  },
+  MainContent: {
+    paddingTop: 10,
+    paddingHorizontal: 10,
+  },
   input: {
-    color: c.text, backgroundColor: c.surfaceInput,
-    paddingVertical: 14, paddingHorizontal: 16,
-    borderRadius: 40, marginBottom: 16, fontSize: 15,
-    fontFamily: 'Poppins_400Regular', borderWidth: 0.5, borderColor: c.borderInput,
+    color: 'rgba(255, 255, 255, 0.9)',
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 40,
+    marginBottom: 16,
+    fontSize: 15,
+    fontFamily: 'Poppins_400Regular',
+    borderWidth: 0.5,
+    borderColor: 'rgba(255,255,255,0.3)',
   },
-  StateRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  StatePlaceholder: { color: c.textPlaceholder, fontSize: 15, fontFamily: 'Poppins_400Regular' },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
-  modalContent: {
-    backgroundColor: c.modalBg, borderTopLeftRadius: 20, borderTopRightRadius: 20,
-    height: '55%', padding: 20, paddingBottom: 35,
+  StateRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
-  stateSearch: {
-    color: c.text, backgroundColor: c.modalSearchBg,
-    paddingVertical: 10, paddingHorizontal: 16,
-    borderRadius: 10, marginBottom: 10, fontSize: 15, fontFamily: 'Poppins_400Regular',
+  StatePlaceholder: {
+    color: 'rgba(255, 255, 255, 0.6)',
+    fontSize: 15,
+    fontFamily: 'Poppins_400Regular',
   },
-  stateOption: { paddingVertical: 14, borderBottomWidth: 0.5, borderBottomColor: c.stateOptionBorder },
-  stateText: { color: c.text, fontSize: 16, fontFamily: 'Poppins_400Regular' },
-  buttonText: { color: c.textSecondary, fontSize: 16, fontFamily: 'Poppins_700Bold' },
-  SubmitButton: {
-    backgroundColor: c.surfaceInput, paddingVertical: 14, borderRadius: 40,
-    marginHorizontal: 110, marginBottom: 16, borderWidth: 0.5,
-    borderColor: c.borderInput, alignItems: 'center', justifyContent: 'center',
+modalOverlay: {
+  flex: 1,
+  backgroundColor: 'rgba(0,0,0,0.5)',
+  justifyContent: 'flex-end',
+},
+modalContent: {
+  backgroundColor: '#1c1c1e',
+  borderTopLeftRadius: 20,
+  borderTopRightRadius: 20,
+  height: '55%',
+  padding: 20,
+  paddingBottom: 35,
+},
+stateSearch: {
+  color: '#ffffff',
+  backgroundColor: 'rgba(255,255,255,0.1)',
+  paddingVertical: 10,
+  paddingHorizontal: 16,
+  borderRadius: 10,
+  marginBottom: 10,
+  fontSize: 15,
+  fontFamily: 'Poppins_400Regular',
+},
+stateOption: {
+  paddingVertical: 14,
+  borderBottomWidth: 0.5,
+  borderBottomColor: 'rgba(255,255,255,0.1)',
+},
+stateText: {
+  color: '#ffffff',
+  fontSize: 16,
+  fontFamily: 'Poppins_400Regular',
+},
+buttonText:{
+    color: 'rgba(255,255,255,0.6)',
+    fontSize: 16,
+    fontFamily: 'Poppins_700Bold',
+},
+SubmitButton:{
+    color: 'rgba(255,255,255,0.6)',
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+    paddingVertical: 14,
+    borderRadius: 40,
+    marginHorizontal:110,
+    marginBottom: 16,
+    borderWidth: 0.5,
+    borderColor: 'rgba(255,255,255,0.3)',
+    alignItems: 'center',
+    justifyContent:'center',
+},
+  DropdownContent: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.02)',
+    borderRadius: 10,
+    marginHorizontal: 10,
+    marginBottom: 5,
+    marginTop: 10,
   },
-  CheckboxRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 6 },
-  DropdownText: { color: c.textSecondary, fontSize: 14, fontFamily: 'Poppins_400Regular', paddingVertical: 4 },
+    CheckboxRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingVertical: 6,
+  },
+    DropdownText: {
+    color: '#8e8e93',
+    fontSize: 14,
+    fontFamily: 'Poppins_400Regular',
+    paddingVertical: 4,
+  },
   SubmitButtonWrapper: {
-    backgroundColor: c.surfaceInput, borderRadius: 40, borderWidth: 0.5,
-    borderColor: c.borderInput, marginBottom: 16, overflow: 'hidden',
-  },
-  SubmitButtonWrapperOpen: { borderRadius: 20 },
-  SubmitButtonInner: {
-    flexDirection: 'row', justifyContent: 'space-between',
-    alignItems: 'center', paddingVertical: 14, paddingHorizontal: 16,
-  },
-  DropdownContent: { paddingHorizontal: 16, paddingVertical: 10, borderTopWidth: 0.5, borderTopColor: c.borderSubtle },
-  Delete: {
-    backgroundColor: 'rgba(188,0,0,0.2)', borderRadius: 40, borderWidth: 0.5,
-    borderColor: 'rgba(209,0,0,0.7)', marginBottom: 16, overflow: 'hidden',
-  },
-  SubmitButtonDelete: {
-    backgroundColor: 'rgba(188,0,0,0.2)', paddingVertical: 14, borderRadius: 40,
-    marginHorizontal: 110, marginBottom: 16, borderWidth: 0.5,
-    borderColor: 'rgba(209,0,0,0.7)', alignItems: 'center', justifyContent: 'center',
-  },
-  StateSelected: { color: c.text, fontSize: 15, fontFamily: 'Poppins_400Regular' },
-  });
-}
+  backgroundColor: 'rgba(255,255,255,0.04)',
+  borderRadius: 40,
+  borderWidth: 0.5,
+  borderColor: 'rgba(255,255,255,0.3)',
+  marginBottom: 16,
+  overflow: 'hidden',
+},
+SubmitButtonWrapperOpen: {
+  borderRadius: 20,
+},
+SubmitButtonInner: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  paddingVertical: 14,
+  paddingHorizontal: 16,
+},
+DropdownContent: {
+  paddingHorizontal: 16,
+  paddingVertical: 10,
+  borderTopWidth: 0.5,
+  borderTopColor: 'rgba(255,255,255,0.1)',
+},
+Delete:{
+  backgroundColor: 'rgba(188, 0, 0, 0.2)',
+  borderRadius: 40,
+  borderWidth: 0.5,
+  borderColor: 'rgba(209, 0, 0, 0.7)',
+  marginBottom: 16,
+  overflow: 'hidden',
+},
+SubmitButtonDelete:{
+    color: 'rgba(255,255,255,0.6)',
+  backgroundColor: 'rgba(188, 0, 0, 0.2)',
+    paddingVertical: 14,
+    borderRadius: 40,
+    marginHorizontal:110,
+    marginBottom: 16,
+    borderWidth: 0.5,
+  borderColor: 'rgba(209, 0, 0, 0.7)',
+    alignItems: 'center',
+    justifyContent:'center',
+},
+StateSelected: {
+    color: 'rgba(255, 255, 255, 0.9)',
+    fontSize: 15,
+    fontFamily: 'Poppins_400Regular',
+},
+});
