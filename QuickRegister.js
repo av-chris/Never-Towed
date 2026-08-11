@@ -20,6 +20,9 @@ import { useState } from 'react';
 import { useSQLiteContext } from 'expo-sqlite';
 import { BASE_URL } from './config';
 
+// Maximum number of simultaneously active permits allowed
+const ACTIVE_PERMIT_LIMIT = 1;
+
 export default function QuickRegister({ navigation, route }) {
   const [fontsLoaded] = useFonts({ Poppins_400Regular, Poppins_700Bold });
 
@@ -94,6 +97,17 @@ export default function QuickRegister({ navigation, route }) {
     }
     try {
       if (save === 'Register') {
+        // Check active permit limit before registering
+        const activeCount = await db.getFirstAsync(
+          'SELECT COUNT(*) as count FROM permits WHERE is_active = 1'
+        );
+        if (activeCount.count >= ACTIVE_PERMIT_LIMIT) {
+          Alert.alert(
+            'Limit Reached',
+            'You must wait for the current permit to expire before registering another vehicle.'
+          );
+          return;
+        }
         await Register();
         Alert.alert('Success', 'Vehicle registered successfully!');
         navigation.goBack();
