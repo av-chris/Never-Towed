@@ -427,6 +427,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.03)',
     borderWidth: 1,
     minHeight: 0,
+    marginBottom:14,
   },
   savedCard: {
     borderColor: 'rgba(196, 181, 253, 0.2)',

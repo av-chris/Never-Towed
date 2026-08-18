@@ -76,6 +76,7 @@ const tabStyles = StyleSheet.create({
     justifyContent: 'space-around',
     paddingTop: 10,
     paddingHorizontal: 32,
+    marginBottom: 1,
   },
   button: {
     width: 52,
