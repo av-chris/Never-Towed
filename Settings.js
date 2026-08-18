@@ -6,15 +6,17 @@ import { useState } from 'react';
 import { useSQLiteContext } from 'expo-sqlite';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
+import { useTheme } from './ThemeContext';
 
 export default function SettingsScreen({ navigation }) {
   const [fontsLoaded] = useFonts({ Poppins_400Regular, Poppins_700Bold });
+  const { colors, preference, setPreference } = useTheme();
+
   const [AccountOpen, setAccountOpen] = useState(false);
   const [NotificationOpen, setNotificationOpen] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [notificationTime, setNotificationTime] = useState('30 minutes before');
   const [ThemeOpen, setThemeOpen] = useState(false);
-  const [theme, setTheme] = useState('Dark');
   const [DataOpen, setDataOpen] = useState(false);
   const [data, setData] = useState('');
 
@@ -51,21 +53,30 @@ export default function SettingsScreen({ navigation }) {
 
   if (!fontsLoaded) return null;
 
+  const cardStyle = {
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    ...colors.cardShadow,
+  };
+
   return (
-    <LinearGradient colors={['#1a1a2e', '#0d0d0d']} style={styles.container}>
-      <StatusBar style="light" />
+    <LinearGradient colors={colors.gradientBg} style={styles.container}>
+      <StatusBar style={colors.statusBar} />
       <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate('Home')}>
-            <Ionicons name="chevron-back" size={20} color="#ffffff" />
+          <TouchableOpacity
+            style={[styles.backButton, { backgroundColor: colors.backButtonBg, borderColor: colors.backButtonBorder }]}
+            onPress={() => navigation.goBack()}
+          >
+            <Ionicons name="chevron-back" size={20} color={colors.text} />
           </TouchableOpacity>
           <View style={styles.headerCenter}>
-            <Text style={styles.headerTitle}>Settings</Text>
-            <Text style={styles.headerSubtitle}>Manage your preferences</Text>
+            <Text style={[styles.headerTitle, { color: colors.text }]}>Settings</Text>
+            <Text style={[styles.headerSubtitle, { color: colors.textTertiary }]}>Manage your preferences</Text>
           </View>
-          <View style={styles.headerBadge}>
-            <Ionicons name="settings-outline" size={18} color="#a5b4fc" />
+          <View style={[styles.headerBadge, { backgroundColor: colors.headerBadgeBg, borderColor: colors.headerBadgeBorder }]}>
+            <Ionicons name="settings-outline" size={18} color={colors.accent} />
           </View>
         </View>
 
@@ -75,40 +86,40 @@ export default function SettingsScreen({ navigation }) {
           showsVerticalScrollIndicator={false}
         >
           {/* Account Card */}
-          <View style={styles.card}>
+          <View style={[styles.card, cardStyle]}>
             <TouchableOpacity
               style={styles.cardRow}
               onPress={() => setAccountOpen(!AccountOpen)}
               activeOpacity={0.7}
             >
-              <View style={styles.cardIconBadge}>
-                <Ionicons name="person-outline" size={16} color="#a5b4fc" />
+              <View style={[styles.cardIconBadge, { backgroundColor: colors.accentBg }]}>
+                <Ionicons name="person-outline" size={16} color={colors.accent} />
               </View>
-              <Text style={styles.cardLabel}>Account</Text>
+              <Text style={[styles.cardLabel, { color: colors.text }]}>Account</Text>
               <Ionicons
                 name={AccountOpen ? 'chevron-down' : 'chevron-forward'}
                 size={18}
-                color="rgba(255,255,255,0.4)"
+                color={colors.textTertiary}
                 style={styles.cardChevron}
               />
             </TouchableOpacity>
             {AccountOpen && (
               <View style={styles.cardDropdown}>
-                <View style={styles.divider} />
+                <View style={[styles.divider, { backgroundColor: colors.divider }]} />
                 <View style={styles.infoRow}>
-                  <Ionicons name="mail-outline" size={14} color="#a5b4fc" />
-                  <Text style={styles.infoText}>Email: example@email.com</Text>
+                  <Ionicons name="mail-outline" size={14} color={colors.accent} />
+                  <Text style={[styles.infoText, { color: colors.textSecondary }]}>Email: example@email.com</Text>
                 </View>
                 <View style={styles.infoRow}>
-                  <Ionicons name="car-outline" size={14} color="#a5b4fc" />
-                  <Text style={styles.infoText}>Parking System: Example System</Text>
+                  <Ionicons name="car-outline" size={14} color={colors.accent} />
+                  <Text style={[styles.infoText, { color: colors.textSecondary }]}>Parking System: Example System</Text>
                 </View>
               </View>
             )}
           </View>
 
           {/* Notifications Card */}
-          <View style={styles.card}>
+          <View style={[styles.card, cardStyle]}>
             <TouchableOpacity
               style={styles.cardRow}
               onPress={() => setNotificationOpen(!NotificationOpen)}
@@ -117,17 +128,17 @@ export default function SettingsScreen({ navigation }) {
               <View style={[styles.cardIconBadge, { backgroundColor: 'rgba(196,181,253,0.15)' }]}>
                 <Ionicons name="notifications-outline" size={16} color="#c4b5fd" />
               </View>
-              <Text style={styles.cardLabel}>Notifications</Text>
+              <Text style={[styles.cardLabel, { color: colors.text }]}>Notifications</Text>
               <Ionicons
                 name={NotificationOpen ? 'chevron-down' : 'chevron-forward'}
                 size={18}
-                color="rgba(255,255,255,0.4)"
+                color={colors.textTertiary}
                 style={styles.cardChevron}
               />
             </TouchableOpacity>
             {NotificationOpen && (
               <View style={styles.cardDropdown}>
-                <View style={styles.divider} />
+                <View style={[styles.divider, { backgroundColor: colors.divider }]} />
                 <TouchableOpacity
                   style={styles.checkRow}
                   onPress={() => setNotificationsEnabled(!notificationsEnabled)}
@@ -136,11 +147,11 @@ export default function SettingsScreen({ navigation }) {
                   <Ionicons
                     name={notificationsEnabled ? 'checkbox' : 'square-outline'}
                     size={20}
-                    color="#a5b4fc"
+                    color={colors.accent}
                   />
-                  <Text style={styles.checkLabel}>Enable Notifications</Text>
+                  <Text style={[styles.checkLabel, { color: colors.text }]}>Enable Notifications</Text>
                 </TouchableOpacity>
-                <Text style={styles.sectionLabel}>
+                <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>
                   When should NeverTowed remind you before your parking permit expires?
                 </Text>
                 {['30 minutes before', '1 hour before', '2 hours before', '3 hours before'].map((time) => (
@@ -153,9 +164,9 @@ export default function SettingsScreen({ navigation }) {
                     <Ionicons
                       name={notificationTime === time ? 'radio-button-on' : 'radio-button-off'}
                       size={20}
-                      color="#a5b4fc"
+                      color={colors.accent}
                     />
-                    <Text style={styles.checkLabel}>{time}</Text>
+                    <Text style={[styles.checkLabel, { color: colors.textSecondary }]}>{time}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
@@ -163,39 +174,44 @@ export default function SettingsScreen({ navigation }) {
           </View>
 
           {/* Appearance Card */}
-          <View style={styles.card}>
+          <View style={[styles.card, cardStyle]}>
             <TouchableOpacity
               style={styles.cardRow}
               onPress={() => setThemeOpen(!ThemeOpen)}
               activeOpacity={0.7}
             >
-              <View style={[styles.cardIconBadge, { backgroundColor: 'rgba(167,243,208,0.12)' }]}>
+              <View style={[styles.cardIconBadge, { backgroundColor: 'rgba(167,243,208,0.15)' }]}>
                 <Ionicons name="contrast-outline" size={16} color="#6ee7b7" />
               </View>
-              <Text style={styles.cardLabel}>Light / Dark Mode</Text>
+              <Text style={[styles.cardLabel, { color: colors.text }]}>Light / Dark Mode</Text>
               <Ionicons
                 name={ThemeOpen ? 'chevron-down' : 'chevron-forward'}
                 size={18}
-                color="rgba(255,255,255,0.4)"
+                color={colors.textTertiary}
                 style={styles.cardChevron}
               />
             </TouchableOpacity>
             {ThemeOpen && (
               <View style={styles.cardDropdown}>
-                <View style={styles.divider} />
-                {['Dark', 'Light', 'System Settings'].map((option) => (
+                <View style={[styles.divider, { backgroundColor: colors.divider }]} />
+                {/* preference values match ThemeContext: 'Dark' | 'Light' | 'System' */}
+                {[
+                  { value: 'Dark',   label: 'Dark'            },
+                  { value: 'Light',  label: 'Light'           },
+                  { value: 'System', label: 'System Settings' },
+                ].map(({ value, label }) => (
                   <TouchableOpacity
-                    key={option}
+                    key={value}
                     style={styles.checkRow}
-                    onPress={() => setTheme(option)}
+                    onPress={() => setPreference(value)}
                     activeOpacity={0.7}
                   >
                     <Ionicons
-                      name={theme === option ? 'radio-button-on' : 'radio-button-off'}
+                      name={preference === value ? 'radio-button-on' : 'radio-button-off'}
                       size={20}
-                      color="#a5b4fc"
+                      color={colors.accent}
                     />
-                    <Text style={styles.checkLabel}>{option}</Text>
+                    <Text style={[styles.checkLabel, { color: colors.textSecondary }]}>{label}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
@@ -203,7 +219,7 @@ export default function SettingsScreen({ navigation }) {
           </View>
 
           {/* Local Data Card */}
-          <View style={styles.card}>
+          <View style={[styles.card, cardStyle]}>
             <TouchableOpacity
               style={styles.cardRow}
               onPress={() => setDataOpen(!DataOpen)}
@@ -212,17 +228,17 @@ export default function SettingsScreen({ navigation }) {
               <View style={[styles.cardIconBadge, { backgroundColor: 'rgba(252,165,165,0.12)' }]}>
                 <Ionicons name="trash-outline" size={16} color="#fca5a5" />
               </View>
-              <Text style={styles.cardLabel}>Local Data</Text>
+              <Text style={[styles.cardLabel, { color: colors.text }]}>Local Data</Text>
               <Ionicons
                 name={DataOpen ? 'chevron-down' : 'chevron-forward'}
                 size={18}
-                color="rgba(255,255,255,0.4)"
+                color={colors.textTertiary}
                 style={styles.cardChevron}
               />
             </TouchableOpacity>
             {DataOpen && (
               <View style={styles.cardDropdown}>
-                <View style={styles.divider} />
+                <View style={[styles.divider, { backgroundColor: colors.divider }]} />
                 {['Delete all Saved Vehicles', 'Delete all Permit History', 'Delete all Local Data'].map(
                   (DataOption) => (
                     <TouchableOpacity
@@ -252,7 +268,11 @@ export default function SettingsScreen({ navigation }) {
           </View>
 
           {/* Log Out Card */}
-          <View style={[styles.card, styles.logoutCard]}>
+          <View style={[
+            styles.card,
+            styles.logoutCard,
+            { backgroundColor: colors.surface, ...colors.cardShadow },
+          ]}>
             <TouchableOpacity
               style={styles.cardRow}
               onPress={() => navigation.reset({ index: 0, routes: [{ name: 'Login' }] })}
@@ -272,12 +292,8 @@ export default function SettingsScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  safeArea: {
-    flex: 1,
-  },
+  container: { flex: 1 },
+  safeArea: { flex: 1 },
   /* ── Header ── */
   header: {
     flexDirection: 'row',
@@ -290,24 +306,18 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 12,
-    backgroundColor: 'rgba(255,255,255,0.07)',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.12)',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
   },
-  headerCenter: {
-    flex: 1,
-  },
+  headerCenter: { flex: 1 },
   headerTitle: {
-    color: '#ffffff',
     fontSize: 22,
     fontFamily: 'Poppins_700Bold',
     lineHeight: 28,
   },
   headerSubtitle: {
-    color: 'rgba(255,255,255,0.4)',
     fontSize: 12,
     fontFamily: 'Poppins_400Regular',
   },
@@ -315,16 +325,12 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 12,
-    backgroundColor: 'rgba(99,102,241,0.18)',
     borderWidth: 1,
-    borderColor: 'rgba(99,102,241,0.35)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   /* ── Scroll ── */
-  scrollView: {
-    flex: 1,
-  },
+  scrollView: { flex: 1 },
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 8,
@@ -333,10 +339,8 @@ const styles = StyleSheet.create({
   },
   /* ── Cards ── */
   card: {
-    backgroundColor: 'rgba(255,255,255,0.05)',
     borderRadius: 18,
     borderWidth: 1,
-    borderColor: 'rgba(99,102,241,0.18)',
     overflow: 'hidden',
   },
   cardRow: {
@@ -350,26 +354,21 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 10,
-    backgroundColor: 'rgba(99,102,241,0.18)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   cardLabel: {
     flex: 1,
-    color: '#ffffff',
     fontSize: 15,
     fontFamily: 'Poppins_400Regular',
   },
-  cardChevron: {
-    marginLeft: 'auto',
-  },
+  cardChevron: { marginLeft: 'auto' },
   cardDropdown: {
     paddingHorizontal: 16,
     paddingBottom: 14,
   },
   divider: {
     height: 1,
-    backgroundColor: 'rgba(255,255,255,0.08)',
     marginBottom: 12,
   },
   /* ── Dropdown rows ── */
@@ -380,12 +379,10 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
   },
   infoText: {
-    color: 'rgba(255,255,255,0.55)',
     fontSize: 13,
     fontFamily: 'Poppins_400Regular',
   },
   sectionLabel: {
-    color: 'rgba(255,255,255,0.7)',
     fontSize: 12,
     fontFamily: 'Poppins_400Regular',
     marginTop: 10,
@@ -399,7 +396,6 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   checkLabel: {
-    color: 'rgba(255,255,255,0.75)',
     fontSize: 14,
     fontFamily: 'Poppins_400Regular',
   },
@@ -423,9 +419,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins_700Bold',
   },
   /* ── Log Out ── */
-  logoutCard: {
-    borderColor: 'rgba(248,113,113,0.25)',
-  },
+  logoutCard: { borderColor: 'rgba(248,113,113,0.25)' },
   logoutLabel: {
     flex: 1,
     color: '#f87171',

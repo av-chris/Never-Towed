@@ -3,30 +3,31 @@ import { useColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { dark, light } from './theme';
 
-// Stored values: 'Dark' | 'Light' | 'System'
+// Values stored in AsyncStorage: 'Dark' | 'Light' | 'System'
 const STORAGE_KEY = '@nevertowed_theme_pref';
 
 const ThemeContext = createContext(null);
 
 export function ThemeProvider({ children }) {
-  const systemScheme = useColorScheme(); // 'light' | 'dark' | null
-  // preference mirrors the Settings UI labels so no mapping layer is needed
-  const [preference, setPreferenceState] = useState('System');
-  const [loaded, setLoaded] = useState(false);
+  const systemScheme = useColorScheme(); // 'light' | 'dark' | null — live, updates if system changes
 
-  // Load persisted preference on mount
+  // Start with 'System' so the app renders immediately using device preference.
+  // AsyncStorage load will update this if the user has saved a manual choice.
+  const [preference, setPreferenceLocal] = useState('System');
+
   useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEY)
-      .then((saved) => {
-        if (saved === 'Dark' || saved === 'Light' || saved === 'System') {
-          setPreferenceState(saved);
-        }
-      })
-      .finally(() => setLoaded(true));
+    AsyncStorage.getItem(STORAGE_KEY).then((saved) => {
+      if (saved === 'Dark' || saved === 'Light' || saved === 'System') {
+        setPreferenceLocal(saved);
+      }
+      // If nothing is saved yet, 'System' stays — correct default behaviour.
+    }).catch(() => {
+      // AsyncStorage unavailable — silently keep System default.
+    });
   }, []);
 
   const setPreference = async (pref) => {
-    setPreferenceState(pref);
+    setPreferenceLocal(pref);
     try {
       await AsyncStorage.setItem(STORAGE_KEY, pref);
     } catch (e) {
@@ -34,20 +35,18 @@ export function ThemeProvider({ children }) {
     }
   };
 
-  // Resolve which scheme is actually active
+  // Resolve which colour set is actually active
   const resolved =
     preference === 'Light' ? 'light'
     : preference === 'Dark' ? 'dark'
-    : (systemScheme ?? 'dark'); // default to dark when system is null (no preference)
+    : (systemScheme ?? 'dark'); // 'System' — follow device; fall back to dark if API unavailable
 
   const colors = resolved === 'light' ? light : dark;
   const isDark = resolved === 'dark';
 
-  // Don't render until we know the saved preference (avoids a flash)
-  if (!loaded) return null;
-
+  // No blocking null — render immediately so NavigationContainer initialises on time.
   return (
-    <ThemeContext.Provider value={{ colors, preference, setPreference, isDark }}>
+    <ThemeContext.Provider value={{ colors, preference, setPreference, isDark, resolved }}>
       {children}
     </ThemeContext.Provider>
   );
@@ -55,6 +54,6 @@ export function ThemeProvider({ children }) {
 
 export function useTheme() {
   const ctx = useContext(ThemeContext);
-  if (!ctx) throw new Error('useTheme must be used inside ThemeProvider');
+  if (!ctx) throw new Error('useTheme must be called inside ThemeProvider');
   return ctx;
 }

@@ -19,12 +19,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { useSQLiteContext } from 'expo-sqlite';
 import { BASE_URL } from './config';
+import { useTheme } from './ThemeContext';
 
 // Maximum number of simultaneously active permits allowed
 const ACTIVE_PERMIT_LIMIT = 1;
 
 export default function QuickRegister({ navigation, route }) {
   const [fontsLoaded] = useFonts({ Poppins_400Regular, Poppins_700Bold });
+  const { colors } = useTheme();
 
   // Access the SQLite database provided by SQLiteProvider in App.js
   const db = useSQLiteContext();
@@ -130,6 +132,7 @@ export default function QuickRegister({ navigation, route }) {
   if (!fontsLoaded) return null;
 
   const isDelete = save === 'Delete';
+  const inputIconColor = colors.accent + '99'; // ~60% opacity
 
   // Per-field icon map
   const fields = [
@@ -141,8 +144,8 @@ export default function QuickRegister({ navigation, route }) {
   ];
 
   return (
-    <LinearGradient colors={['#1a1a2e', '#0d0d0d']} style={styles.container}>
-      <StatusBar style="light" />
+    <LinearGradient colors={colors.gradientBg} style={styles.container}>
+      <StatusBar style={colors.statusBar} />
       <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
         <KeyboardAvoidingView
           style={{ flex: 1 }}
@@ -155,101 +158,109 @@ export default function QuickRegister({ navigation, route }) {
           >
             {/* ── Header ── */}
             <View style={styles.header}>
-              <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-                <Ionicons name="chevron-back" size={22} color="#ffffff" />
+              <TouchableOpacity
+                style={[styles.backButton, { backgroundColor: colors.backButtonBg, borderColor: colors.backButtonBorder }]}
+                onPress={() => navigation.goBack()}
+              >
+                <Ionicons name="chevron-back" size={22} color={colors.text} />
               </TouchableOpacity>
               <View style={styles.headerTextGroup}>
-                <Text style={styles.headerTitle}>Quick Register</Text>
-                <Text style={styles.headerSub}>
+                <Text style={[styles.headerTitle, { color: colors.text }]}>Quick Register</Text>
+                <Text style={[styles.headerSub, { color: colors.textTertiary }]}>
                   {vehicle?.nickname || vehicle?.licence_plate || 'Saved vehicle'}
                 </Text>
               </View>
-              <View style={styles.headerIcon}>
-                <Ionicons name="flash" size={20} color="#a5b4fc" />
+              <View style={[styles.headerIcon, { backgroundColor: colors.accentBg, borderColor: colors.accentBorder }]}>
+                <Ionicons name="flash" size={20} color={colors.accent} />
               </View>
             </View>
 
             {/* ── Form card ── */}
-            <View style={styles.card}>
+            <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.borderAccent, ...colors.cardShadow }]}>
               {/* Card header */}
               <View style={styles.cardHeader}>
-                <View style={styles.cardIconBadge}>
-                  <Ionicons name="car-sport" size={15} color="#a5b4fc" />
+                <View style={[styles.cardIconBadge, { backgroundColor: colors.accentBg }]}>
+                  <Ionicons name="car-sport" size={15} color={colors.accent} />
                 </View>
-                <Text style={styles.cardTitle}>Vehicle Details</Text>
+                <Text style={[styles.cardTitle, { color: colors.text }]}>Vehicle Details</Text>
               </View>
 
               {/* Text inputs */}
               <View style={styles.fieldGroup}>
                 {fields.map(({ key, placeholder, icon }) => (
-                  <View key={key} style={styles.inputWrapper}>
+                  <View key={key} style={[styles.inputWrapper, { backgroundColor: colors.surfaceSecondary, borderColor: colors.border }]}>
                     <Ionicons
                       name={icon}
                       size={16}
-                      color="rgba(165,180,252,0.6)"
+                      color={inputIconColor}
                       style={styles.inputIcon}
                     />
                     <TextInput
-                      style={styles.input}
+                      style={[styles.input, { color: colors.text }]}
                       editable={save === 'Edit'}
                       value={form[key]}
                       onChangeText={(text) => setform({ ...form, [key]: text })}
                       placeholder={placeholder}
-                      placeholderTextColor="rgba(255,255,255,0.3)"
+                      placeholderTextColor={colors.textMuted}
                     />
                   </View>
                 ))}
 
                 {/* State picker row */}
                 <TouchableOpacity
-                  style={styles.inputWrapper}
+                  style={[styles.inputWrapper, { backgroundColor: colors.surfaceSecondary, borderColor: colors.border }]}
                   onPress={() => save === 'Edit' && setStatePickerOpen(true)}
                 >
                   <Ionicons
                     name="location-outline"
                     size={16}
-                    color="rgba(165,180,252,0.6)"
+                    color={inputIconColor}
                     style={styles.inputIcon}
                   />
-                  <Text style={[styles.input, !selectedState && styles.placeholderText]}>
+                  <Text style={[styles.input, !selectedState && { color: colors.textMuted }]}>
                     {selectedState || 'License State'}
                   </Text>
-                  <Ionicons name="chevron-forward" size={16} color="rgba(255,255,255,0.3)" />
+                  <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
                 </TouchableOpacity>
               </View>
 
-              <View style={styles.divider} />
+              <View style={[styles.divider, { backgroundColor: colors.divider }]} />
 
               {/* ── Action dropdown (Register / Edit / Delete) ── */}
               <View style={[
                 isDelete ? styles.actionDropdownDelete : styles.actionDropdown,
-                saveOpen && styles.actionDropdownOpen,
+                isDelete
+                  ? { backgroundColor: colors.redBg, borderColor: colors.redBorder }
+                  : { backgroundColor: colors.surfaceSecondary, borderColor: 'rgba(196,181,253,0.2)' },
               ]}>
                 <TouchableOpacity
                   style={styles.actionDropdownHeader}
                   onPress={() => setSaveOpen(!saveOpen)}
                 >
                   <View style={styles.actionLeft}>
-                    <View style={[styles.cardIconBadge, isDelete ? styles.deleteBadge : styles.actionBadge]}>
+                    <View style={[styles.cardIconBadge, isDelete
+                      ? { backgroundColor: colors.redBg }
+                      : { backgroundColor: 'rgba(196,181,253,0.15)' }
+                    ]}>
                       <Ionicons
                         name={isDelete ? 'trash-outline' : 'options-outline'}
                         size={15}
-                        color={isDelete ? '#f87171' : '#c4b5fd'}
+                        color={isDelete ? colors.red : '#c4b5fd'}
                       />
                     </View>
-                    <Text style={[styles.actionLabel, isDelete && styles.actionLabelDelete]}>
+                    <Text style={[styles.actionLabel, { color: isDelete ? colors.red : colors.text }]}>
                       {save}
                     </Text>
                   </View>
                   <Ionicons
                     name={saveOpen ? 'chevron-down' : 'chevron-forward'}
                     size={18}
-                    color="rgba(255,255,255,0.4)"
+                    color={colors.textTertiary}
                   />
                 </TouchableOpacity>
 
                 {saveOpen && (
-                  <View style={styles.actionDropdownBody}>
+                  <View style={[styles.actionDropdownBody, { borderTopColor: colors.divider }]}>
                     {['Register', 'Edit', 'Delete'].map((option) => (
                       <TouchableOpacity
                         key={option}
@@ -259,12 +270,13 @@ export default function QuickRegister({ navigation, route }) {
                         <Ionicons
                           name={save === option ? 'radio-button-on' : 'radio-button-off'}
                           size={20}
-                          color={option === 'Delete' ? '#f87171' : '#a5b4fc'}
+                          color={option === 'Delete' ? colors.red : colors.accent}
                         />
                         <Text style={[
                           styles.radioText,
-                          save === option && styles.radioTextActive,
-                          option === 'Delete' && styles.radioTextDelete,
+                          { color: colors.textSecondary },
+                          save === option && { color: option === 'Delete' ? colors.red : colors.accent, fontFamily: 'Poppins_700Bold' },
+                          option === 'Delete' && { color: colors.red },
                         ]}>
                           {option}
                         </Text>
@@ -276,16 +288,21 @@ export default function QuickRegister({ navigation, route }) {
 
               {/* ── Confirm button ── */}
               <TouchableOpacity
-                style={isDelete ? styles.confirmButtonDelete : styles.confirmButton}
+                style={[
+                  styles.confirmButton,
+                  isDelete
+                    ? { backgroundColor: colors.redBg, borderColor: colors.redBorder }
+                    : { backgroundColor: colors.accentBg, borderColor: colors.accentBorder },
+                ]}
                 onPress={handleSubmit}
                 activeOpacity={0.8}
               >
                 <Ionicons
                   name={isDelete ? 'trash-outline' : 'checkmark-circle-outline'}
                   size={18}
-                  color="#ffffff"
+                  color={isDelete ? colors.red : colors.accent}
                 />
-                <Text style={styles.confirmText}>Confirm</Text>
+                <Text style={[styles.confirmText, { color: isDelete ? colors.red : colors.accent }]}>Confirm</Text>
               </TouchableOpacity>
             </View>
           </ScrollView>
@@ -298,15 +315,18 @@ export default function QuickRegister({ navigation, route }) {
             activeOpacity={1}
             onPress={() => { setStatePickerOpen(false); setStateSearch(''); }}
           >
-            <TouchableOpacity style={styles.modalContent} activeOpacity={1}>
-              <View style={styles.modalHandle} />
-              <Text style={styles.modalTitle}>Select State</Text>
-              <View style={styles.searchWrapper}>
-                <Ionicons name="search-outline" size={16} color="rgba(255,255,255,0.4)" />
+            <TouchableOpacity
+              style={[styles.modalContent, { backgroundColor: colors.surface, borderColor: colors.borderAccent }]}
+              activeOpacity={1}
+            >
+              <View style={[styles.modalHandle, { backgroundColor: colors.divider }]} />
+              <Text style={[styles.modalTitle, { color: colors.text }]}>Select State</Text>
+              <View style={[styles.searchWrapper, { backgroundColor: colors.surfaceSecondary, borderColor: colors.border }]}>
+                <Ionicons name="search-outline" size={16} color={colors.textTertiary} />
                 <TextInput
-                  style={styles.stateSearch}
+                  style={[styles.stateSearch, { color: colors.text }]}
                   placeholder="Search state..."
-                  placeholderTextColor="rgba(255,255,255,0.3)"
+                  placeholderTextColor={colors.textMuted}
                   value={stateSearch}
                   onChangeText={setStateSearch}
                 />
@@ -317,7 +337,7 @@ export default function QuickRegister({ navigation, route }) {
                 keyboardShouldPersistTaps="handled"
                 renderItem={({ item }) => (
                   <TouchableOpacity
-                    style={styles.stateOption}
+                    style={[styles.stateOption, { borderBottomColor: colors.divider }]}
                     onPress={() => {
                       setSelectedState(item);
                       setform({ ...form, licence_state: item });
@@ -325,9 +345,9 @@ export default function QuickRegister({ navigation, route }) {
                       setStateSearch('');
                     }}
                   >
-                    <Text style={styles.stateText}>{item}</Text>
+                    <Text style={[styles.stateText, { color: colors.text }]}>{item}</Text>
                     {selectedState === item && (
-                      <Ionicons name="checkmark" size={18} color="#a5b4fc" />
+                      <Ionicons name="checkmark" size={18} color={colors.accent} />
                     )}
                   </TouchableOpacity>
                 )}
@@ -362,9 +382,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 12,
-    backgroundColor: 'rgba(255,255,255,0.05)',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -375,22 +393,18 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 22,
     fontFamily: 'Poppins_700Bold',
-    color: '#ffffff',
     letterSpacing: -0.5,
   },
   headerSub: {
     fontSize: 12,
     fontFamily: 'Poppins_400Regular',
-    color: 'rgba(255,255,255,0.45)',
     marginTop: 1,
   },
   headerIcon: {
     width: 44,
     height: 44,
     borderRadius: 14,
-    backgroundColor: 'rgba(99,102,241,0.15)',
     borderWidth: 1,
-    borderColor: 'rgba(99,102,241,0.25)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -399,9 +413,7 @@ const styles = StyleSheet.create({
   card: {
     borderRadius: 22,
     padding: 18,
-    backgroundColor: 'rgba(255,255,255,0.05)',
     borderWidth: 1,
-    borderColor: 'rgba(99,102,241,0.25)',
   },
   cardHeader: {
     flexDirection: 'row',
@@ -413,14 +425,12 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 8,
-    backgroundColor: 'rgba(99,102,241,0.2)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   cardTitle: {
     fontSize: 13,
     fontFamily: 'Poppins_700Bold',
-    color: '#ffffff',
   },
 
   /* ── Input fields ── */
@@ -431,10 +441,8 @@ const styles = StyleSheet.create({
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.05)',
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: 'rgba(99,102,241,0.15)',
     paddingHorizontal: 14,
     paddingVertical: 12,
   },
@@ -443,38 +451,26 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    color: '#ffffff',
     fontSize: 14,
     fontFamily: 'Poppins_400Regular',
   },
-  placeholderText: {
-    color: 'rgba(255,255,255,0.3)',
-  },
   divider: {
     height: 1,
-    backgroundColor: 'rgba(255,255,255,0.06)',
     marginVertical: 14,
   },
 
   /* ── Action dropdown ── */
   actionDropdown: {
-    backgroundColor: 'rgba(255,255,255,0.04)',
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: 'rgba(196,181,253,0.2)',
     overflow: 'hidden',
     marginBottom: 12,
   },
   actionDropdownDelete: {
-    backgroundColor: 'rgba(248,113,113,0.07)',
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: 'rgba(248,113,113,0.3)',
     overflow: 'hidden',
     marginBottom: 12,
-  },
-  actionDropdownOpen: {
-    borderRadius: 14,
   },
   actionDropdownHeader: {
     flexDirection: 'row',
@@ -487,25 +483,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
   },
-  actionBadge: {
-    backgroundColor: 'rgba(196,181,253,0.15)',
-  },
-  deleteBadge: {
-    backgroundColor: 'rgba(248,113,113,0.15)',
-  },
   actionLabel: {
     fontSize: 13,
     fontFamily: 'Poppins_700Bold',
-    color: '#ffffff',
-  },
-  actionLabelDelete: {
-    color: '#f87171',
   },
   actionDropdownBody: {
     paddingHorizontal: 14,
     paddingBottom: 12,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.06)',
     gap: 4,
   },
   radioRow: {
@@ -517,14 +502,6 @@ const styles = StyleSheet.create({
   radioText: {
     fontSize: 13,
     fontFamily: 'Poppins_400Regular',
-    color: 'rgba(255,255,255,0.5)',
-  },
-  radioTextActive: {
-    color: '#a5b4fc',
-    fontFamily: 'Poppins_700Bold',
-  },
-  radioTextDelete: {
-    color: '#f87171',
   },
 
   /* ── Confirm button ── */
@@ -533,25 +510,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: 'rgba(99,102,241,0.25)',
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: 'rgba(99,102,241,0.5)',
-    paddingVertical: 14,
-  },
-  confirmButtonDelete: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    backgroundColor: 'rgba(248,113,113,0.15)',
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: 'rgba(248,113,113,0.4)',
     paddingVertical: 14,
   },
   confirmText: {
-    color: '#ffffff',
     fontSize: 15,
     fontFamily: 'Poppins_700Bold',
   },
@@ -563,7 +526,6 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: '#16162a',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     height: '55%',
@@ -572,12 +534,10 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderLeftWidth: 1,
     borderRightWidth: 1,
-    borderColor: 'rgba(99,102,241,0.25)',
   },
   modalHandle: {
     width: 36,
     height: 4,
-    backgroundColor: 'rgba(255,255,255,0.2)',
     borderRadius: 2,
     alignSelf: 'center',
     marginBottom: 14,
@@ -585,23 +545,19 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 16,
     fontFamily: 'Poppins_700Bold',
-    color: '#ffffff',
     marginBottom: 12,
   },
   searchWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: 'rgba(255,255,255,0.07)',
     borderRadius: 12,
     paddingHorizontal: 12,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: 'rgba(99,102,241,0.15)',
   },
   stateSearch: {
     flex: 1,
-    color: '#ffffff',
     paddingVertical: 10,
     fontSize: 14,
     fontFamily: 'Poppins_400Regular',
@@ -612,10 +568,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 13,
     borderBottomWidth: 0.5,
-    borderBottomColor: 'rgba(255,255,255,0.07)',
   },
   stateText: {
-    color: '#ffffff',
     fontSize: 15,
     fontFamily: 'Poppins_400Regular',
   },

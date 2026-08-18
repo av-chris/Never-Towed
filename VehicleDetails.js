@@ -4,6 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
+import { useTheme } from './ThemeContext';
 
 function formatDate(dateStr) {
   if (!dateStr) return '—';
@@ -32,13 +33,14 @@ function getTimeRemaining(expirationDate) {
 
 export default function VehicleDetailScreen({ route, navigation }) {
   const [fontsLoaded] = useFonts({ Poppins_400Regular, Poppins_700Bold });
+  const { colors } = useTheme();
 
   const permit = route?.params?.permit ?? null;
   const vehicle = route?.params?.vehicle ?? null;
 
   const isActive = permit?.is_active === 1;
   const timer = getTimeRemaining(permit?.expiration_date);
-  const timerColor = timer.expired ? '#ff6b6b' : isActive ? '#4cd964' : '#6366f1';
+  const timerColor = timer.expired ? colors.timerExpired : isActive ? colors.timerProtected : colors.timerDefault;
 
   if (!fontsLoaded) return null;
 
@@ -56,23 +58,28 @@ export default function VehicleDetailScreen({ route, navigation }) {
     { icon: 'timer-outline', label: 'Expires', value: formatDate(permit?.expiration_date) },
   ];
 
+  const inputIconColor = colors.accent + '99';
+
   return (
-    <LinearGradient colors={['#1a1a2e', '#0d0d0d']} style={styles.container}>
-      <StatusBar style="light" />
+    <LinearGradient colors={colors.gradientBg} style={styles.container}>
+      <StatusBar style={colors.statusBar} />
       <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-            <Ionicons name="chevron-back" size={20} color="#ffffff" />
+          <TouchableOpacity
+            style={[styles.backButton, { backgroundColor: colors.backButtonBg, borderColor: colors.backButtonBorder }]}
+            onPress={() => navigation.goBack()}
+          >
+            <Ionicons name="chevron-back" size={20} color={colors.text} />
           </TouchableOpacity>
           <View style={styles.headerCenter}>
-            <Text style={styles.headerTitle}>Current Vehicle</Text>
-            <Text style={styles.headerSubtitle}>
+            <Text style={[styles.headerTitle, { color: colors.text }]}>Current Vehicle</Text>
+            <Text style={[styles.headerSubtitle, { color: colors.textTertiary }]}>
               {vehicle?.nickname || permit?.licence_plate || 'No vehicle'}
             </Text>
           </View>
-          <View style={styles.headerBadge}>
-            <Ionicons name="car-sport" size={18} color="#a5b4fc" />
+          <View style={[styles.headerBadge, { backgroundColor: colors.headerBadgeBg, borderColor: colors.headerBadgeBorder }]}>
+            <Ionicons name="car-sport" size={18} color={colors.accent} />
           </View>
         </View>
 
@@ -83,73 +90,73 @@ export default function VehicleDetailScreen({ route, navigation }) {
         >
           {/* Timer hero card */}
           {permit && (
-            <View style={styles.heroCard}>
+            <View style={[styles.heroCard, { backgroundColor: colors.surface, borderColor: colors.borderAccent, ...colors.cardShadow }]}>
               <View style={styles.heroLeft}>
-                <View style={[styles.statusPill, { backgroundColor: isActive ? 'rgba(76,217,100,0.15)' : 'rgba(255,107,107,0.12)' }]}>
-                  <View style={[styles.statusDot, { backgroundColor: isActive ? '#4cd964' : '#ff6b6b' }]} />
-                  <Text style={[styles.statusText, { color: isActive ? '#4cd964' : '#ff6b6b' }]}>
+                <View style={[styles.statusPill, { backgroundColor: isActive ? colors.greenBg : colors.redBg }]}>
+                  <View style={[styles.statusDot, { backgroundColor: isActive ? colors.green : colors.red }]} />
+                  <Text style={[styles.statusText, { color: isActive ? colors.green : colors.red }]}>
                     {isActive ? 'Protected' : 'Permit expired'}
                   </Text>
                 </View>
-                <Text style={styles.heroLabel}>Time remaining</Text>
+                <Text style={[styles.heroLabel, { color: colors.textTertiary }]}>Time remaining</Text>
                 <Text style={[styles.heroTimer, { color: timerColor }]}>{timer.label}</Text>
               </View>
-              <View style={[styles.timerRing, { borderColor: timerColor }]}>
+              <View style={[styles.timerRing, { borderColor: timerColor, backgroundColor: colors.timerRingBg }]}>
                 <Ionicons name="shield-checkmark" size={28} color={timerColor} />
               </View>
             </View>
           )}
 
           {/* Vehicle info card */}
-          <View style={styles.card}>
+          <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border, ...colors.cardShadow }]}>
             <View style={styles.cardHeader}>
-              <View style={styles.cardIconBadge}>
-                <Ionicons name="car-sport" size={15} color="#a5b4fc" />
+              <View style={[styles.cardIconBadge, { backgroundColor: colors.accentBg }]}>
+                <Ionicons name="car-sport" size={15} color={colors.accent} />
               </View>
-              <Text style={styles.cardTitle}>Vehicle Info</Text>
+              <Text style={[styles.cardTitle, { color: colors.text }]}>Vehicle Info</Text>
             </View>
             {vehicleRows.map(({ icon, label, value }, i) => (
-              <View key={label} style={[styles.row, i === vehicleRows.length - 1 && styles.rowLast]}>
+              <View key={label} style={[styles.row, { borderBottomColor: colors.divider }, i === vehicleRows.length - 1 && styles.rowLast]}>
                 <View style={styles.rowLeft}>
-                  <Ionicons name={icon} size={14} color="rgba(165,180,252,0.6)" />
-                  <Text style={styles.rowLabel}>{label}</Text>
+                  <Ionicons name={icon} size={14} color={inputIconColor} />
+                  <Text style={[styles.rowLabel, { color: colors.textSecondary }]}>{label}</Text>
                 </View>
-                <Text style={styles.rowValue} numberOfLines={1}>{value ?? '—'}</Text>
+                <Text style={[styles.rowValue, { color: colors.text }]} numberOfLines={1}>{value ?? '—'}</Text>
               </View>
             ))}
           </View>
 
           {/* Permit dates card — only shown when there's an active permit */}
           {permit && (
-            <View style={[styles.card, { borderColor: 'rgba(76,217,100,0.18)' }]}>
+            <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.greenBorder, ...colors.cardShadow }]}>
               <View style={styles.cardHeader}>
-                <View style={[styles.cardIconBadge, { backgroundColor: 'rgba(76,217,100,0.12)' }]}>
-                  <Ionicons name="document-text-outline" size={15} color="#4cd964" />
+                <View style={[styles.cardIconBadge, { backgroundColor: colors.greenBg }]}>
+                  <Ionicons name="document-text-outline" size={15} color={colors.green} />
                 </View>
-                <Text style={styles.cardTitle}>Active Permit</Text>
+                <Text style={[styles.cardTitle, { color: colors.text }]}>Active Permit</Text>
               </View>
               {permitRows.map(({ icon, label, value }, i) => (
-                <View key={label} style={[styles.row, i === permitRows.length - 1 && styles.rowLast]}>
+                <View key={label} style={[styles.row, { borderBottomColor: colors.divider }, i === permitRows.length - 1 && styles.rowLast]}>
                   <View style={styles.rowLeft}>
-                    <Ionicons name={icon} size={14} color="rgba(165,180,252,0.6)" />
-                    <Text style={styles.rowLabel}>{label}</Text>
+                    <Ionicons name={icon} size={14} color={inputIconColor} />
+                    <Text style={[styles.rowLabel, { color: colors.textSecondary }]}>{label}</Text>
                   </View>
-                  <Text style={styles.rowValue} numberOfLines={2}>{value}</Text>
+                  <Text style={[styles.rowValue, { color: colors.text }]} numberOfLines={2}>{value}</Text>
                 </View>
               ))}
             </View>
           )}
 
           {!permit && (
-            <View style={styles.emptyCard}>
-              <Ionicons name="document-outline" size={32} color="rgba(255,255,255,0.2)" />
-              <Text style={styles.emptyText}>No active permit.{'\n'}Register this vehicle to protect it.</Text>
+            <View style={[styles.emptyCard, { backgroundColor: colors.surfaceSecondary, borderColor: colors.border }]}>
+              <Ionicons name="document-outline" size={32} color={colors.textMuted} />
+              <Text style={[styles.emptyText, { color: colors.textTertiary }]}>No active permit.{'\n'}Register this vehicle to protect it.</Text>
               <TouchableOpacity
-                style={styles.registerButton}
+                style={[styles.registerButton, { backgroundColor: colors.accentBg, borderColor: colors.accentBorder }]}
                 onPress={() => navigation.navigate('AddVehicle')}
                 activeOpacity={0.8}
               >
-                <Text style={styles.registerButtonText}>Register Now</Text>
+                <Text style={[styles.registerButtonText, { color: colors.accent }]}>Register Now</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -175,21 +182,17 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 12,
-    backgroundColor: 'rgba(255,255,255,0.07)',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.12)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   headerCenter: { flex: 1 },
   headerTitle: {
-    color: '#ffffff',
     fontSize: 20,
     fontFamily: 'Poppins_700Bold',
     lineHeight: 26,
   },
   headerSubtitle: {
-    color: 'rgba(255,255,255,0.4)',
     fontSize: 12,
     fontFamily: 'Poppins_400Regular',
   },
@@ -197,9 +200,7 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 12,
-    backgroundColor: 'rgba(99,102,241,0.18)',
     borderWidth: 1,
-    borderColor: 'rgba(99,102,241,0.35)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -208,10 +209,8 @@ const styles = StyleSheet.create({
   scrollContent: { paddingHorizontal: 20, paddingBottom: 32, gap: 14 },
   /* Hero timer card */
   heroCard: {
-    backgroundColor: 'rgba(255,255,255,0.05)',
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: 'rgba(99,102,241,0.25)',
     padding: 18,
     flexDirection: 'row',
     alignItems: 'center',
@@ -231,7 +230,6 @@ const styles = StyleSheet.create({
   statusDot: { width: 6, height: 6, borderRadius: 3 },
   statusText: { fontSize: 11, fontFamily: 'Poppins_700Bold' },
   heroLabel: {
-    color: 'rgba(255,255,255,0.45)',
     fontSize: 12,
     fontFamily: 'Poppins_400Regular',
   },
@@ -247,14 +245,11 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(0,0,0,0.2)',
   },
   /* Info card */
   card: {
-    backgroundColor: 'rgba(255,255,255,0.05)',
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: 'rgba(99,102,241,0.18)',
     padding: 16,
   },
   cardHeader: {
@@ -267,12 +262,10 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 9,
-    backgroundColor: 'rgba(99,102,241,0.18)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   cardTitle: {
-    color: '#ffffff',
     fontSize: 14,
     fontFamily: 'Poppins_700Bold',
   },
@@ -282,7 +275,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 11,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.06)',
     gap: 8,
   },
   rowLast: { borderBottomWidth: 0 },
@@ -293,12 +285,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   rowLabel: {
-    color: 'rgba(255,255,255,0.5)',
     fontSize: 13,
     fontFamily: 'Poppins_400Regular',
   },
   rowValue: {
-    color: '#ffffff',
     fontSize: 13,
     fontFamily: 'Poppins_700Bold',
     maxWidth: '55%',
@@ -306,32 +296,26 @@ const styles = StyleSheet.create({
   },
   /* Empty state */
   emptyCard: {
-    backgroundColor: 'rgba(255,255,255,0.04)',
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
     padding: 28,
     alignItems: 'center',
     gap: 12,
   },
   emptyText: {
-    color: 'rgba(255,255,255,0.4)',
     fontSize: 13,
     fontFamily: 'Poppins_400Regular',
     textAlign: 'center',
     lineHeight: 20,
   },
   registerButton: {
-    backgroundColor: 'rgba(99,102,241,0.25)',
     borderWidth: 1,
-    borderColor: 'rgba(99,102,241,0.5)',
     borderRadius: 12,
     paddingVertical: 10,
     paddingHorizontal: 24,
     marginTop: 4,
   },
   registerButtonText: {
-    color: '#ffffff',
     fontSize: 13,
     fontFamily: 'Poppins_700Bold',
   },

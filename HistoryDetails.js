@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useSQLiteContext } from 'expo-sqlite';
+import { useTheme } from './ThemeContext';
 
 function formatDate(dateStr) {
   if (!dateStr) return '—';
@@ -21,6 +22,7 @@ function formatDate(dateStr) {
 
 export default function HistoryDetail({ route, navigation }) {
   const [fontsLoaded] = useFonts({ Poppins_400Regular, Poppins_700Bold });
+  const { colors } = useTheme();
   const db = useSQLiteContext();
 
   // Permit passed from HomeScreen history list
@@ -67,24 +69,31 @@ export default function HistoryDetail({ route, navigation }) {
     { icon: 'timer-outline', label: 'Expires', value: formatDate(permit?.expiration_date) },
   ];
 
+  const inputIconColor = colors.accent + '99';
+
   return (
-    <LinearGradient colors={['#1a1a2e', '#0d0d0d']} style={styles.container}>
-      <StatusBar style="light" />
+    <LinearGradient colors={colors.gradientBg} style={styles.container}>
+      <StatusBar style={colors.statusBar} />
       <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-            <Ionicons name="chevron-back" size={20} color="#ffffff" />
+          <TouchableOpacity
+            style={[styles.backButton, { backgroundColor: colors.backButtonBg, borderColor: colors.backButtonBorder }]}
+            onPress={() => navigation.goBack()}
+          >
+            <Ionicons name="chevron-back" size={20} color={colors.text} />
           </TouchableOpacity>
           <View style={styles.headerCenter}>
-            <Text style={styles.headerTitle}>Permit Detail</Text>
-            <Text style={styles.headerSubtitle}>
+            <Text style={[styles.headerTitle, { color: colors.text }]}>Permit Detail</Text>
+            <Text style={[styles.headerSubtitle, { color: colors.textTertiary }]}>
               {permit?.licence_plate ?? 'Permit history'}
             </Text>
           </View>
-          <View style={[styles.statusPill, { backgroundColor: isActive ? 'rgba(76,217,100,0.15)' : 'rgba(255,255,255,0.07)' }]}>
-            <View style={[styles.statusDot, { backgroundColor: isActive ? '#4cd964' : '#8e8e93' }]} />
-            <Text style={[styles.statusText, { color: isActive ? '#4cd964' : '#8e8e93' }]}>
+          <View style={[styles.statusPill, {
+            backgroundColor: isActive ? colors.greenBg : colors.surfaceSecondary,
+          }]}>
+            <View style={[styles.statusDot, { backgroundColor: isActive ? colors.green : colors.iconMuted }]} />
+            <Text style={[styles.statusText, { color: isActive ? colors.green : colors.iconMuted }]}>
               {isActive ? 'Active' : 'Expired'}
             </Text>
           </View>
@@ -96,29 +105,33 @@ export default function HistoryDetail({ route, navigation }) {
           showsVerticalScrollIndicator={false}
         >
           {/* Info card */}
-          <View style={styles.card}>
+          <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.amberBg, ...colors.cardShadow }]}>
             <View style={styles.cardHeader}>
-              <View style={styles.cardIconBadge}>
-                <Ionicons name="document-text-outline" size={15} color="#fbbf24" />
+              <View style={[styles.cardIconBadge, { backgroundColor: colors.amberBg }]}>
+                <Ionicons name="document-text-outline" size={15} color={colors.amber} />
               </View>
-              <Text style={styles.cardTitle}>Permit Information</Text>
+              <Text style={[styles.cardTitle, { color: colors.text }]}>Permit Information</Text>
             </View>
 
             {rows.map(({ icon, label, value }, i) => (
-              <View key={label} style={[styles.row, i === rows.length - 1 && styles.rowLast]}>
+              <View key={label} style={[styles.row, { borderBottomColor: colors.divider }, i === rows.length - 1 && styles.rowLast]}>
                 <View style={styles.rowLeft}>
-                  <Ionicons name={icon} size={14} color="rgba(165,180,252,0.6)" />
-                  <Text style={styles.rowLabel}>{label}</Text>
+                  <Ionicons name={icon} size={14} color={inputIconColor} />
+                  <Text style={[styles.rowLabel, { color: colors.textSecondary }]}>{label}</Text>
                 </View>
-                <Text style={styles.rowValue} numberOfLines={1}>{value ?? '—'}</Text>
+                <Text style={[styles.rowValue, { color: colors.text }]} numberOfLines={1}>{value ?? '—'}</Text>
               </View>
             ))}
           </View>
 
           {/* Delete button */}
-          <TouchableOpacity style={styles.deleteButton} onPress={handleDelete} activeOpacity={0.8}>
-            <Ionicons name="trash-outline" size={16} color="#f87171" />
-            <Text style={styles.deleteText}>Delete From History</Text>
+          <TouchableOpacity
+            style={[styles.deleteButton, { backgroundColor: colors.redBg, borderColor: colors.redBorder }]}
+            onPress={handleDelete}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="trash-outline" size={16} color={colors.red} />
+            <Text style={[styles.deleteText, { color: colors.red }]}>Delete From History</Text>
           </TouchableOpacity>
         </ScrollView>
       </SafeAreaView>
@@ -142,21 +155,17 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 12,
-    backgroundColor: 'rgba(255,255,255,0.07)',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.12)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   headerCenter: { flex: 1 },
   headerTitle: {
-    color: '#ffffff',
     fontSize: 20,
     fontFamily: 'Poppins_700Bold',
     lineHeight: 26,
   },
   headerSubtitle: {
-    color: 'rgba(255,255,255,0.4)',
     fontSize: 12,
     fontFamily: 'Poppins_400Regular',
   },
@@ -175,10 +184,8 @@ const styles = StyleSheet.create({
   scrollContent: { paddingHorizontal: 20, paddingBottom: 32, gap: 14 },
   /* Card */
   card: {
-    backgroundColor: 'rgba(255,255,255,0.05)',
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: 'rgba(251,191,36,0.2)',
     padding: 16,
   },
   cardHeader: {
@@ -191,12 +198,10 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 9,
-    backgroundColor: 'rgba(251,191,36,0.12)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   cardTitle: {
-    color: '#ffffff',
     fontSize: 14,
     fontFamily: 'Poppins_700Bold',
   },
@@ -207,7 +212,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 11,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.06)',
     gap: 8,
   },
   rowLast: { borderBottomWidth: 0 },
@@ -218,12 +222,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   rowLabel: {
-    color: 'rgba(255,255,255,0.5)',
     fontSize: 13,
     fontFamily: 'Poppins_400Regular',
   },
   rowValue: {
-    color: '#ffffff',
     fontSize: 13,
     fontFamily: 'Poppins_700Bold',
     maxWidth: '55%',
@@ -235,14 +237,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: 'rgba(248,113,113,0.1)',
     borderWidth: 1,
-    borderColor: 'rgba(248,113,113,0.3)',
     borderRadius: 16,
     paddingVertical: 14,
   },
   deleteText: {
-    color: '#f87171',
     fontSize: 15,
     fontFamily: 'Poppins_700Bold',
   },

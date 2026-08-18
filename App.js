@@ -210,8 +210,34 @@ function TabScreens() {
 
 // ─────────────────────────────────────────────────────────────
 // Outer stack — Login + tab shell + detail screens
+// Wrapped in its own component so it can call useTheme() for
+// the contentStyle background, which must come from inside ThemeProvider.
 // ─────────────────────────────────────────────────────────────
 const Stack = createNativeStackNavigator();
+
+function ThemedStack() {
+  const { colors } = useTheme();
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+        contentStyle: { backgroundColor: colors.gradientBg[1] },
+      }}
+    >
+      <Stack.Screen name="Login" component={LoginScreen} />
+      {/* Tab shell — gestureEnabled:false so you can't swipe back to Login */}
+      <Stack.Screen
+        name="Tabs"
+        component={TabScreens}
+        options={{ gestureEnabled: false, animation: 'fade' }}
+      />
+      {/* Detail screens pushed on top of the tab shell */}
+      <Stack.Screen name="History"       component={HistoryDetail} />
+      <Stack.Screen name="VehicleDetail" component={VehicleDetail} />
+      <Stack.Screen name="QuickRegister" component={QuickRegister} />
+    </Stack.Navigator>
+  );
+}
 
 export default function App() {
   return (
@@ -246,21 +272,7 @@ export default function App() {
         useSuspense={false}
       >
         <NavigationContainer>
-          <Stack.Navigator
-            screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#0d0d0d' } }}
-          >
-            <Stack.Screen name="Login" component={LoginScreen} />
-            {/* Tab shell — gestureEnabled:false so you can't swipe back to Login */}
-            <Stack.Screen
-              name="Tabs"
-              component={TabScreens}
-              options={{ gestureEnabled: false, animation: 'fade' }}
-            />
-            {/* Detail screens pushed on top of the tab shell */}
-            <Stack.Screen name="History"      component={HistoryDetail} />
-            <Stack.Screen name="VehicleDetail" component={VehicleDetail} />
-            <Stack.Screen name="QuickRegister" component={QuickRegister} />
-          </Stack.Navigator>
+          <ThemedStack />
         </NavigationContainer>
       </SQLiteProvider>
       </ThemeProvider>

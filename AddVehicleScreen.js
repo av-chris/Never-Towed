@@ -19,12 +19,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { useSQLiteContext } from 'expo-sqlite';
 import { BASE_URL } from './config';
+import { useTheme } from './ThemeContext';
 
 // Maximum number of simultaneously active permits allowed
 const ACTIVE_PERMIT_LIMIT = 1;
 
 export default function AddVehicle({ navigation }) {
   const [fontsLoaded] = useFonts({ Poppins_400Regular, Poppins_700Bold });
+  const { colors } = useTheme();
 
   // Full list of US states for the state picker modal
   const states = [
@@ -164,9 +166,11 @@ export default function AddVehicle({ navigation }) {
 
   if (!fontsLoaded) return null;
 
+  const inputIconColor = colors.accent + '99'; // ~60% opacity accent
+
   return (
-    <LinearGradient colors={['#1a1a2e', '#0d0d0d']} style={styles.container}>
-      <StatusBar style="light" />
+    <LinearGradient colors={colors.gradientBg} style={styles.container}>
+      <StatusBar style={colors.statusBar} />
       <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
         <KeyboardAvoidingView
           style={{ flex: 1 }}
@@ -179,27 +183,30 @@ export default function AddVehicle({ navigation }) {
           >
             {/* Header */}
             <View style={styles.header}>
-              <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate('Home')}>
-                <Ionicons name="chevron-back" size={24} color="#ffffff" />
+              <TouchableOpacity
+                style={[styles.backButton, { backgroundColor: colors.backButtonBg, borderColor: colors.backButtonBorder }]}
+                onPress={() => navigation.navigate('Home')}
+              >
+                <Ionicons name="chevron-back" size={24} color={colors.text} />
               </TouchableOpacity>
               <View style={styles.headerTextGroup}>
-                <Text style={styles.headerTitle}>Add Vehicle</Text>
-                <Text style={styles.headerSub}>Save or register your car</Text>
+                <Text style={[styles.headerTitle, { color: colors.text }]}>Add Vehicle</Text>
+                <Text style={[styles.headerSub, { color: colors.textTertiary }]}>Save or register your car</Text>
               </View>
-              <View style={styles.headerIcon}>
-                <Ionicons name="car-sport" size={22} color="#a5b4fc" />
+              <View style={[styles.headerIcon, { backgroundColor: colors.accentBg, borderColor: colors.accentBorder }]}>
+                <Ionicons name="car-sport" size={22} color={colors.accent} />
               </View>
             </View>
 
             {/* Form card */}
-            <View style={styles.card}>
+            <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.borderAccent, ...colors.cardShadow }]}>
               {/* Card header */}
               <View style={styles.cardHeader}>
                 <View style={styles.cardTitleRow}>
-                  <View style={styles.cardIconBadge}>
-                    <Ionicons name="document-text-outline" size={15} color="#a5b4fc" />
+                  <View style={[styles.cardIconBadge, { backgroundColor: colors.accentBg }]}>
+                    <Ionicons name="document-text-outline" size={15} color={colors.accent} />
                   </View>
-                  <Text style={styles.cardTitle}>Vehicle Details</Text>
+                  <Text style={[styles.cardTitle, { color: colors.text }]}>Vehicle Details</Text>
                 </View>
               </View>
 
@@ -212,12 +219,12 @@ export default function AddVehicle({ navigation }) {
                   { key: 'model', placeholder: 'Model', icon: 'construct-outline' },
                   { key: 'color', placeholder: 'Color', icon: 'color-palette-outline' },
                 ].map(({ key, placeholder, icon }) => (
-                  <View key={key} style={styles.inputWrapper}>
-                    <Ionicons name={icon} size={16} color="rgba(165,180,252,0.6)" style={styles.inputIcon} />
+                  <View key={key} style={[styles.inputWrapper, { backgroundColor: colors.surfaceSecondary, borderColor: colors.border }]}>
+                    <Ionicons name={icon} size={16} color={inputIconColor} style={styles.inputIcon} />
                     <TextInput
-                      style={styles.input}
+                      style={[styles.input, { color: colors.text }]}
                       placeholder={placeholder}
-                      placeholderTextColor="rgba(255,255,255,0.3)"
+                      placeholderTextColor={colors.textMuted}
                       value={form[key]}
                       onChangeText={(text) => setform({ ...form, [key]: text })}
                     />
@@ -225,35 +232,38 @@ export default function AddVehicle({ navigation }) {
                 ))}
 
                 {/* State picker — opens modal with searchable list */}
-                <TouchableOpacity style={styles.inputWrapper} onPress={() => setStatePickerOpen(true)}>
-                  <Ionicons name="location-outline" size={16} color="rgba(165,180,252,0.6)" style={styles.inputIcon} />
-                  <Text style={[styles.input, !selectedState && styles.placeholderText]}>
+                <TouchableOpacity
+                  style={[styles.inputWrapper, { backgroundColor: colors.surfaceSecondary, borderColor: colors.border }]}
+                  onPress={() => setStatePickerOpen(true)}
+                >
+                  <Ionicons name="location-outline" size={16} color={inputIconColor} style={styles.inputIcon} />
+                  <Text style={[styles.input, !selectedState && { color: colors.textMuted }]}>
                     {selectedState || 'License State'}
                   </Text>
-                  <Ionicons name="chevron-forward" size={16} color="rgba(255,255,255,0.3)" />
+                  <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
                 </TouchableOpacity>
               </View>
 
-              <View style={styles.divider} />
+              <View style={[styles.divider, { backgroundColor: colors.divider }]} />
 
               {/* Save/Register dropdown to select submit behavior */}
-              <View style={[styles.actionDropdown, saveOpen && styles.actionDropdownOpen]}>
+              <View style={[styles.actionDropdown, { backgroundColor: colors.surfaceSecondary, borderColor: 'rgba(196,181,253,0.2)' }]}>
                 <TouchableOpacity style={styles.actionDropdownHeader} onPress={() => setSaveOpen(!saveOpen)}>
                   <View style={styles.cardTitleRow}>
                     <View style={[styles.cardIconBadge, styles.actionBadge]}>
                       <Ionicons name="options-outline" size={15} color="#c4b5fd" />
                     </View>
-                    <Text style={styles.actionLabel}>{save}</Text>
+                    <Text style={[styles.actionLabel, { color: colors.text }]}>{save}</Text>
                   </View>
                   <Ionicons
                     name={saveOpen ? 'chevron-down' : 'chevron-forward'}
                     size={18}
-                    color="rgba(255,255,255,0.4)"
+                    color={colors.textTertiary}
                   />
                 </TouchableOpacity>
 
                 {saveOpen && (
-                  <View style={styles.actionDropdownBody}>
+                  <View style={[styles.actionDropdownBody, { borderTopColor: colors.divider }]}>
                     {['Save and Register', 'Only Save', 'Only Register'].map((option) => (
                       <TouchableOpacity
                         key={option}
@@ -263,9 +273,9 @@ export default function AddVehicle({ navigation }) {
                         <Ionicons
                           name={save === option ? 'radio-button-on' : 'radio-button-off'}
                           size={20}
-                          color={save === option ? '#a5b4fc' : 'rgba(255,255,255,0.3)'}
+                          color={save === option ? colors.accent : colors.textTertiary}
                         />
-                        <Text style={[styles.radioText, save === option && styles.radioTextActive]}>
+                        <Text style={[styles.radioText, { color: colors.textSecondary }, save === option && { color: colors.accent, fontFamily: 'Poppins_700Bold' }]}>
                           {option}
                         </Text>
                       </TouchableOpacity>
@@ -275,9 +285,12 @@ export default function AddVehicle({ navigation }) {
               </View>
 
               {/* Submit button */}
-              <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-                <Ionicons name="checkmark-circle-outline" size={18} color="#ffffff" />
-                <Text style={styles.submitText}>Submit</Text>
+              <TouchableOpacity
+                style={[styles.submitButton, { backgroundColor: colors.accentBg, borderColor: colors.accentBorder }]}
+                onPress={handleSubmit}
+              >
+                <Ionicons name="checkmark-circle-outline" size={18} color={colors.accent} />
+                <Text style={[styles.submitText, { color: colors.accent }]}>Submit</Text>
               </TouchableOpacity>
             </View>
           </ScrollView>
@@ -293,15 +306,18 @@ export default function AddVehicle({ navigation }) {
               setStateSearch('');
             }}
           >
-            <TouchableOpacity style={styles.modalContent} activeOpacity={1}>
-              <View style={styles.modalHandle} />
-              <Text style={styles.modalTitle}>Select State</Text>
-              <View style={styles.searchWrapper}>
-                <Ionicons name="search-outline" size={16} color="rgba(255,255,255,0.4)" />
+            <TouchableOpacity
+              style={[styles.modalContent, { backgroundColor: colors.surface, borderColor: colors.borderAccent }]}
+              activeOpacity={1}
+            >
+              <View style={[styles.modalHandle, { backgroundColor: colors.divider }]} />
+              <Text style={[styles.modalTitle, { color: colors.text }]}>Select State</Text>
+              <View style={[styles.searchWrapper, { backgroundColor: colors.surfaceSecondary, borderColor: colors.border }]}>
+                <Ionicons name="search-outline" size={16} color={colors.textTertiary} />
                 <TextInput
-                  style={styles.stateSearch}
+                  style={[styles.stateSearch, { color: colors.text }]}
                   placeholder="Search state..."
-                  placeholderTextColor="rgba(255,255,255,0.3)"
+                  placeholderTextColor={colors.textMuted}
                   value={stateSearch}
                   onChangeText={setStateSearch}
                 />
@@ -312,7 +328,7 @@ export default function AddVehicle({ navigation }) {
                 keyboardShouldPersistTaps="handled"
                 renderItem={({ item }) => (
                   <TouchableOpacity
-                    style={styles.stateOption}
+                    style={[styles.stateOption, { borderBottomColor: colors.divider }]}
                     onPress={() => {
                       // Update both display state and form state on selection
                       setSelectedState(item);
@@ -321,9 +337,9 @@ export default function AddVehicle({ navigation }) {
                       setStateSearch('');
                     }}
                   >
-                    <Text style={styles.stateText}>{item}</Text>
+                    <Text style={[styles.stateText, { color: colors.text }]}>{item}</Text>
                     {selectedState === item && (
-                      <Ionicons name="checkmark" size={18} color="#a5b4fc" />
+                      <Ionicons name="checkmark" size={18} color={colors.accent} />
                     )}
                   </TouchableOpacity>
                 )}
@@ -359,9 +375,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 12,
-    backgroundColor: 'rgba(255,255,255,0.05)',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -372,31 +386,25 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 22,
     fontFamily: 'Poppins_700Bold',
-    color: '#ffffff',
     letterSpacing: -0.5,
   },
   headerSub: {
     fontSize: 12,
     fontFamily: 'Poppins_400Regular',
-    color: 'rgba(255,255,255,0.45)',
     marginTop: 1,
   },
   headerIcon: {
     width: 44,
     height: 44,
     borderRadius: 14,
-    backgroundColor: 'rgba(99,102,241,0.15)',
     borderWidth: 1,
-    borderColor: 'rgba(99,102,241,0.25)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   card: {
     borderRadius: 22,
     padding: 18,
-    backgroundColor: 'rgba(255,255,255,0.05)',
     borderWidth: 1,
-    borderColor: 'rgba(99,102,241,0.25)',
   },
   cardHeader: {
     flexDirection: 'row',
@@ -413,14 +421,12 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 8,
-    backgroundColor: 'rgba(99,102,241,0.2)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   cardTitle: {
     fontSize: 13,
     fontFamily: 'Poppins_700Bold',
-    color: '#ffffff',
   },
   fieldGroup: {
     gap: 10,
@@ -429,10 +435,8 @@ const styles = StyleSheet.create({
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.05)',
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: 'rgba(99,102,241,0.15)',
     paddingHorizontal: 14,
     paddingVertical: 12,
   },
@@ -441,28 +445,18 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    color: '#ffffff',
     fontSize: 14,
     fontFamily: 'Poppins_400Regular',
   },
-  placeholderText: {
-    color: 'rgba(255,255,255,0.3)',
-  },
   divider: {
     height: 1,
-    backgroundColor: 'rgba(255,255,255,0.06)',
     marginVertical: 14,
   },
   actionDropdown: {
-    backgroundColor: 'rgba(255,255,255,0.04)',
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: 'rgba(196,181,253,0.2)',
     overflow: 'hidden',
     marginBottom: 12,
-  },
-  actionDropdownOpen: {
-    borderRadius: 14,
   },
   actionDropdownHeader: {
     flexDirection: 'row',
@@ -476,13 +470,11 @@ const styles = StyleSheet.create({
   actionLabel: {
     fontSize: 13,
     fontFamily: 'Poppins_700Bold',
-    color: '#ffffff',
   },
   actionDropdownBody: {
     paddingHorizontal: 14,
     paddingBottom: 12,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.06)',
     gap: 4,
   },
   radioRow: {
@@ -494,25 +486,17 @@ const styles = StyleSheet.create({
   radioText: {
     fontSize: 13,
     fontFamily: 'Poppins_400Regular',
-    color: 'rgba(255,255,255,0.5)',
-  },
-  radioTextActive: {
-    color: '#a5b4fc',
-    fontFamily: 'Poppins_700Bold',
   },
   submitButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: 'rgba(99,102,241,0.25)',
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: 'rgba(99,102,241,0.5)',
     paddingVertical: 14,
   },
   submitText: {
-    color: '#ffffff',
     fontSize: 15,
     fontFamily: 'Poppins_700Bold',
   },
@@ -522,7 +506,6 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: '#16162a',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     height: '55%',
@@ -531,12 +514,10 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderLeftWidth: 1,
     borderRightWidth: 1,
-    borderColor: 'rgba(99,102,241,0.25)',
   },
   modalHandle: {
     width: 36,
     height: 4,
-    backgroundColor: 'rgba(255,255,255,0.2)',
     borderRadius: 2,
     alignSelf: 'center',
     marginBottom: 14,
@@ -544,23 +525,19 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 16,
     fontFamily: 'Poppins_700Bold',
-    color: '#ffffff',
     marginBottom: 12,
   },
   searchWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: 'rgba(255,255,255,0.07)',
     borderRadius: 12,
     paddingHorizontal: 12,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: 'rgba(99,102,241,0.15)',
   },
   stateSearch: {
     flex: 1,
-    color: '#ffffff',
     paddingVertical: 10,
     fontSize: 14,
     fontFamily: 'Poppins_400Regular',
@@ -571,10 +548,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 13,
     borderBottomWidth: 0.5,
-    borderBottomColor: 'rgba(255,255,255,0.07)',
   },
   stateText: {
-    color: '#ffffff',
     fontSize: 15,
     fontFamily: 'Poppins_400Regular',
   },

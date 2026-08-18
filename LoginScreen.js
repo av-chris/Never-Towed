@@ -18,9 +18,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { BASE_URL } from './config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useTheme } from './ThemeContext';
 
 export default function LoginScreen({ navigation }) {
   const [fontsLoaded] = useFonts({ Poppins_400Regular, Poppins_700Bold });
+  const { colors } = useTheme();
   const [Email, setEmail] = useState('');
   const [Password, setPassword] = useState('');
   const [focusedField, setFocusedField] = useState(null);
@@ -53,8 +55,8 @@ export default function LoginScreen({ navigation }) {
   if (!fontsLoaded) return null;
 
   return (
-    <LinearGradient colors={['#1a1a2e', '#0d0d0d']} style={styles.container}>
-      <StatusBar style="light" />
+    <LinearGradient colors={colors.gradientBg} style={styles.container}>
+      <StatusBar style={colors.statusBar} />
 
       {/* Ambient background accents */}
       <View style={styles.glowTop} />
@@ -68,37 +70,38 @@ export default function LoginScreen({ navigation }) {
         <View style={styles.content}>
           {/* Brand header */}
           <View style={styles.brandSection}>
-            <View style={styles.logoBadge}>
-              <Ionicons name="car-sport" size={28} color="#ffffff" />
+            <View style={[styles.logoBadge, { backgroundColor: colors.accentBg, borderColor: colors.accentBorder }]}>
+              <Ionicons name="car-sport" size={28} color={colors.accent} />
             </View>
-            <Text style={styles.headerText}>Never Towed</Text>
-            <Text style={styles.tagline}>Park smart. Stay protected.</Text>
+            <Text style={[styles.headerText, { color: colors.text }]}>Never Towed</Text>
+            <Text style={[styles.tagline, { color: colors.textSecondary }]}>Park smart. Stay protected.</Text>
           </View>
 
           {/* Login card */}
-          <BlurView intensity={35} tint="dark" style={styles.loginBox}>
-            <Text style={styles.cardTitle}>Welcome back</Text>
-            <Text style={styles.cardSubtitle}>Sign in to manage your vehicles</Text>
+          <BlurView intensity={35} tint={colors.blurTint} style={[styles.loginBox, { borderColor: colors.border, backgroundColor: colors.surface }]}>
+            <Text style={[styles.cardTitle, { color: colors.text }]}>Welcome back</Text>
+            <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>Sign in to manage your vehicles</Text>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Username</Text>
+              <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Username</Text>
               <View
                 style={[
                   styles.inputWrapper,
-                  focusedField === 'email' && styles.inputWrapperFocused,
+                  { backgroundColor: colors.surfaceSecondary, borderColor: colors.border },
+                  focusedField === 'email' && { borderColor: colors.accentBorder, backgroundColor: colors.accentBgSoft },
                 ]}
               >
                 <Ionicons
                   name="person-outline"
                   size={20}
-                  color={focusedField === 'email' ? '#a5b4fc' : 'rgba(255,255,255,0.45)'}
+                  color={focusedField === 'email' ? colors.accent : colors.textTertiary}
                   style={styles.inputIcon}
                 />
                 <TextInput
                   value={Email}
-                  style={styles.input}
+                  style={[styles.input, { color: colors.text }]}
                   placeholder="Enter your username"
-                  placeholderTextColor="rgba(255,255,255,0.35)"
+                  placeholderTextColor={colors.textMuted}
                   onChangeText={(text) => setEmail(text)}
                   onFocus={() => setFocusedField('email')}
                   onBlur={() => setFocusedField(null)}
@@ -109,24 +112,25 @@ export default function LoginScreen({ navigation }) {
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Password</Text>
+              <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Password</Text>
               <View
                 style={[
                   styles.inputWrapper,
-                  focusedField === 'password' && styles.inputWrapperFocused,
+                  { backgroundColor: colors.surfaceSecondary, borderColor: colors.border },
+                  focusedField === 'password' && { borderColor: colors.accentBorder, backgroundColor: colors.accentBgSoft },
                 ]}
               >
                 <Ionicons
                   name="lock-closed-outline"
                   size={20}
-                  color={focusedField === 'password' ? '#a5b4fc' : 'rgba(255,255,255,0.45)'}
+                  color={focusedField === 'password' ? colors.accent : colors.textTertiary}
                   style={styles.inputIcon}
                 />
                 <TextInput
                   value={Password}
-                  style={styles.input}
+                  style={[styles.input, { color: colors.text }]}
                   placeholder="Enter your password"
-                  placeholderTextColor="rgba(255,255,255,0.35)"
+                  placeholderTextColor={colors.textMuted}
                   secureTextEntry
                   onChangeText={setPassword}
                   onFocus={() => setFocusedField('password')}
@@ -151,7 +155,7 @@ export default function LoginScreen({ navigation }) {
             </Pressable>
           </BlurView>
 
-          <Text style={styles.footerText}>Never get towed because your permit expired</Text>
+          <Text style={[styles.footerText, { color: colors.textMuted }]}>Never get towed because your permit expired</Text>
         </View>
       </KeyboardAvoidingView>
       </SafeAreaView>
@@ -162,7 +166,6 @@ export default function LoginScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000000',
   },
   flex: {
     flex: 1,
@@ -198,9 +201,7 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 20,
-    backgroundColor: 'rgba(99, 102, 241, 0.2)',
     borderWidth: 1,
-    borderColor: 'rgba(99, 102, 241, 0.35)',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
@@ -208,13 +209,11 @@ const styles = StyleSheet.create({
   headerText: {
     fontSize: 34,
     fontFamily: 'Poppins_700Bold',
-    color: '#ffffff',
     letterSpacing: -0.5,
   },
   tagline: {
     fontSize: 15,
     fontFamily: 'Poppins_400Regular',
-    color: 'rgba(255,255,255,0.55)',
     marginTop: 6,
   },
   loginBox: {
@@ -222,19 +221,15 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     padding: 28,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.12)',
-    backgroundColor: 'rgba(255,255,255,0.04)',
   },
   cardTitle: {
     fontSize: 22,
     fontFamily: 'Poppins_700Bold',
-    color: '#ffffff',
     marginBottom: 4,
   },
   cardSubtitle: {
     fontSize: 14,
     fontFamily: 'Poppins_400Regular',
-    color: 'rgba(255,255,255,0.5)',
     marginBottom: 28,
   },
   inputGroup: {
@@ -243,29 +238,21 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: 13,
     fontFamily: 'Poppins_400Regular',
-    color: 'rgba(255,255,255,0.65)',
     marginBottom: 8,
     marginLeft: 4,
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.07)',
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
     paddingHorizontal: 14,
-  },
-  inputWrapperFocused: {
-    borderColor: 'rgba(99, 102, 241, 0.6)',
-    backgroundColor: 'rgba(99, 102, 241, 0.08)',
   },
   inputIcon: {
     marginRight: 10,
   },
   input: {
     flex: 1,
-    color: '#ffffff',
     paddingVertical: 15,
     fontSize: 15,
     fontFamily: 'Poppins_400Regular',
@@ -300,7 +287,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 13,
     fontFamily: 'Poppins_400Regular',
-    color: 'rgba(255,255,255,0.3)',
     marginTop: 28,
   },
 });
