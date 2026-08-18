@@ -237,9 +237,9 @@ export default function AddVehicle({ navigation }) {
                   onPress={() => setStatePickerOpen(true)}
                 >
                   <Ionicons name="location-outline" size={16} color={inputIconColor} style={styles.inputIcon} />
-                  <Text style={[styles.input, !selectedState && { color: colors.textMuted }]}>
-                    {selectedState || 'License State'}
-                  </Text>
+                    <Text style={[styles.input, { color: selectedState ? colors.text : colors.textMuted }]}>
+                       {selectedState || 'License State'}
+                    </Text>
                   <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
                 </TouchableOpacity>
               </View>
