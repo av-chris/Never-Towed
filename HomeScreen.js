@@ -217,7 +217,7 @@ export default function HomeScreen({ navigation }) {
           </View>
         </View>
 
-        {/* Debug-only button to clear active status — never shown in production */}
+        {/* Debug-only button to clear active status — never shown in production 
         {__DEV__ && permit && (
           <TouchableOpacity
             style={[
@@ -229,7 +229,7 @@ export default function HomeScreen({ navigation }) {
           >
             <Text style={[styles.debugText, { color: colors.textMuted }]}>Debug: Clear</Text>
           </TouchableOpacity>
-        )}
+        )}*/}
       </TouchableOpacity>
     );
   };
