@@ -307,7 +307,7 @@ export default function AddVehicle({ navigation }) {
             }}
           >
             <TouchableOpacity
-              style={[styles.modalContent, { backgroundColor: colors.surface, borderColor: colors.borderAccent }]}
+              style={[styles.modalContent, { backgroundColor: colors.gradientBg[0], borderColor: colors.borderAccent }]}
               activeOpacity={1}
             >
               <View style={[styles.modalHandle, { backgroundColor: colors.divider }]} />

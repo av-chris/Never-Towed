@@ -316,7 +316,7 @@ export default function QuickRegister({ navigation, route }) {
             onPress={() => { setStatePickerOpen(false); setStateSearch(''); }}
           >
             <TouchableOpacity
-              style={[styles.modalContent, { backgroundColor: colors.surface, borderColor: colors.borderAccent }]}
+              style={[styles.modalContent, { backgroundColor: colors.gradientBg[0], borderColor: colors.borderAccent }]}
               activeOpacity={1}
             >
               <View style={[styles.modalHandle, { backgroundColor: colors.divider }]} />
