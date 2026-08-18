@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   useWindowDimensions,
 } from 'react-native';
+import { ThemeProvider, useTheme } from './ThemeContext';
 import {
   NavigationContainer,
   useNavigationBuilder,
@@ -37,24 +38,37 @@ const TAB_CONFIG = [
 
 function TrifoldTabBar({ state, navigation }) {
   const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
   const activeRoute = state.routes[state.index].name;
 
   return (
-    <BlurView intensity={40} tint="dark" style={tabStyles.bar}>
+    <BlurView
+      intensity={40}
+      tint={colors.blurTint}
+      style={[tabStyles.bar, { borderTopColor: colors.tabBarBorder }]}
+    >
       <View style={[tabStyles.row, { paddingBottom: 10 + insets.bottom }]}>
         {TAB_CONFIG.map((tab) => {
           const isActive = activeRoute === tab.name;
           return (
             <TouchableOpacity
               key={tab.name}
-              style={[tabStyles.button, isActive && tabStyles.buttonActive]}
+              style={[
+                tabStyles.button,
+                isActive && {
+                  backgroundColor: colors.tabActiveBg,
+                  borderWidth: 1,
+                  borderColor: colors.tabActiveBorder,
+                  borderRadius: 16,
+                },
+              ]}
               onPress={() => navigation.navigate(tab.name)}
               activeOpacity={0.7}
             >
               <Ionicons
                 name={tab.icon}
                 size={tab.name === 'AddVehicle' ? 26 : 24}
-                color={isActive ? '#a5b4fc' : 'rgba(255,255,255,0.45)'}
+                color={isActive ? colors.tabActiveIcon : colors.tabInactiveIcon}
               />
             </TouchableOpacity>
           );
@@ -84,11 +98,6 @@ const tabStyles = StyleSheet.create({
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  buttonActive: {
-    backgroundColor: 'rgba(99,102,241,0.18)',
-    borderWidth: 1,
-    borderColor: 'rgba(99,102,241,0.35)',
   },
 });
 
@@ -207,6 +216,7 @@ const Stack = createNativeStackNavigator();
 export default function App() {
   return (
     <SafeAreaProvider>
+      <ThemeProvider>
       <SQLiteProvider
         databaseName="nevertowed.db"
         onInit={async (db) => {
@@ -253,6 +263,7 @@ export default function App() {
           </Stack.Navigator>
         </NavigationContainer>
       </SQLiteProvider>
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }

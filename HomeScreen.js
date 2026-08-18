@@ -14,6 +14,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useState, useCallback, useEffect } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
+import { useTheme } from './ThemeContext';
 
 function getTimeRemaining(expirationDate) {
   if (!expirationDate) return { label: '24:00', expired: false, hasPermit: false };
@@ -55,6 +56,7 @@ function findVehicleForPermit(vehicles, permit) {
 
 export default function HomeScreen({ navigation }) {
   const { width } = useWindowDimensions();
+  const { colors } = useTheme();
   const db = useSQLiteContext();
   const [vehicles, setVehicles] = useState([]);
   const [permits, setPermits] = useState([]);
@@ -113,7 +115,11 @@ export default function HomeScreen({ navigation }) {
     // Access tick so every 60-second tick triggers a fresh time calculation
     void tick;
     const timer = getTimeRemaining(permit?.expiration_date);
-    const timerColor = timer.expired ? '#ff6b6b' : timer.hasPermit ? '#4cd964' : '#6366f1';
+    const timerColor = timer.expired
+      ? colors.timerExpired
+      : timer.hasPermit
+        ? colors.timerProtected
+        : colors.timerDefault;
 
     const displayName =
       vehicle?.nickname ||
@@ -140,29 +146,41 @@ export default function HomeScreen({ navigation }) {
         ? 'Protected'
         : 'Not registered';
 
-    const statusColor = timer.expired
-      ? 'rgba(255, 107, 107, 0.15)'
+    const statusBg = timer.expired
+      ? colors.redBg
       : permit
-        ? 'rgba(76, 217, 100, 0.15)'
-        : 'rgba(255,255,255,0.08)';
+        ? colors.greenBg
+        : colors.accentBgSoft;
 
-    const statusTextColor = timer.expired ? '#ff6b6b' : permit ? '#4cd964' : '#8e8e93';
+    const statusTextColor = timer.expired
+      ? colors.timerExpired
+      : permit
+        ? colors.timerProtected
+        : colors.textTertiary;
 
     return (
       <TouchableOpacity
         key={permit?.id ?? 'empty'}
-        style={[styles.currentCard, extraStyle]}
+        style={[
+          styles.currentCard,
+          {
+            backgroundColor: colors.surface,
+            borderColor: colors.borderAccent,
+            ...colors.cardShadow,
+          },
+          extraStyle,
+        ]}
         activeOpacity={0.85}
         onPress={() => navigation.navigate('VehicleDetail', { permit, vehicle })}
       >
         <View style={styles.cardHeader}>
           <View style={styles.cardTitleRow}>
-            <View style={[styles.cardIconBadge, styles.currentBadge]}>
-              <Ionicons name="car-sport" size={16} color="#a5b4fc" />
+            <View style={[styles.cardIconBadge, { backgroundColor: colors.accentBg }]}>
+              <Ionicons name="car-sport" size={16} color={colors.accent} />
             </View>
-            <Text style={styles.cardTitle}>Current Vehicle</Text>
+            <Text style={[styles.cardTitle, { color: colors.text }]}>Current Vehicle</Text>
           </View>
-          <View style={[styles.statusPill, { backgroundColor: statusColor }]}>
+          <View style={[styles.statusPill, { backgroundColor: statusBg }]}>
             <View style={[styles.statusDot, { backgroundColor: statusTextColor }]} />
             <Text style={[styles.statusText, { color: statusTextColor }]}>{statusLabel}</Text>
           </View>
@@ -170,12 +188,12 @@ export default function HomeScreen({ navigation }) {
 
         <View style={styles.currentBody}>
           <View style={styles.currentInfo}>
-            <Text style={styles.vehicleName}>{displayName}</Text>
-            <Text style={styles.vehicleDetail}>{displayMakeModel}</Text>
+            <Text style={[styles.vehicleName, { color: colors.text }]}>{displayName}</Text>
+            <Text style={[styles.vehicleDetail, { color: colors.textSecondary }]}>{displayMakeModel}</Text>
             {displayPlate ? (
               <View style={styles.plateRow}>
-                <Ionicons name="card-outline" size={14} color="#8e8e93" />
-                <Text style={styles.plateText}>{displayPlate}</Text>
+                <Ionicons name="card-outline" size={14} color={colors.iconMuted} />
+                <Text style={[styles.plateText, { color: colors.iconMuted }]}>{displayPlate}</Text>
               </View>
             ) : null}
           </View>
@@ -185,14 +203,15 @@ export default function HomeScreen({ navigation }) {
               styles.timerRing,
               {
                 borderColor: timerColor,
+                backgroundColor: colors.timerRingBg,
                 width: width * 0.26,
                 height: width * 0.26,
                 borderRadius: (width * 0.26) / 2,
               },
             ]}
           >
-            <Text style={styles.timerText}>{timer.label}</Text>
-            <Text style={styles.timerLabel}>
+            <Text style={[styles.timerText, { color: colors.text }]}>{timer.label}</Text>
+            <Text style={[styles.timerLabel, { color: colors.iconMuted }]}>
               {permit ? 'Time left' : 'Default'}
             </Text>
           </View>
@@ -201,11 +220,14 @@ export default function HomeScreen({ navigation }) {
         {/* Debug-only button to clear active status — never shown in production */}
         {__DEV__ && permit && (
           <TouchableOpacity
-            style={styles.debugButton}
+            style={[
+              styles.debugButton,
+              { backgroundColor: colors.accentBgSoft, borderColor: colors.border },
+            ]}
             onPress={() => handleDebugClear(permit)}
             activeOpacity={0.7}
           >
-            <Text style={styles.debugText}>Debug: Clear</Text>
+            <Text style={[styles.debugText, { color: colors.textMuted }]}>Debug: Clear</Text>
           </TouchableOpacity>
         )}
       </TouchableOpacity>
@@ -213,20 +235,23 @@ export default function HomeScreen({ navigation }) {
   };
 
   return (
-    <LinearGradient colors={['#1a1a2e', '#0d0d0d']} style={styles.container}>
-      <StatusBar style="light" />
+    <LinearGradient colors={colors.gradientBg} style={styles.container}>
+      <StatusBar style={colors.statusBar} />
       <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
         <View style={styles.dashboard}>
           {/* Header */}
           <View style={styles.header}>
             <View>
-              <Text style={styles.greeting}>Never Towed</Text>
-              <Text style={[styles.subGreeting, { maxWidth: width * 0.72 }]}>
+              <Text style={[styles.greeting, { color: colors.text }]}>Never Towed</Text>
+              <Text style={[styles.subGreeting, { maxWidth: width * 0.72, color: colors.textSecondary }]}>
                 Keep your car protected from surprise tows
               </Text>
             </View>
-            <View style={styles.headerIcon}>
-              <Ionicons name="shield-checkmark" size={22} color="#a5b4fc" />
+            <View style={[
+              styles.headerIcon,
+              { backgroundColor: colors.headerBadgeBg, borderColor: colors.headerBadgeBorder },
+            ]}>
+              <Ionicons name="shield-checkmark" size={22} color={colors.accent} />
             </View>
           </View>
 
@@ -247,15 +272,22 @@ export default function HomeScreen({ navigation }) {
           {/* Saved Vehicles + History */}
           <View style={styles.bottomRow}>
             {/* Saved Vehicles */}
-            <View style={[styles.sideCard, styles.savedCard]}>
+            <View style={[
+              styles.sideCard,
+              {
+                backgroundColor: colors.surfaceSecondary,
+                borderColor: colors.borderAccent,
+                ...colors.cardShadow,
+              },
+            ]}>
               <View style={styles.cardHeader}>
                 <View style={styles.cardTitleRow}>
-                  <View style={[styles.cardIconBadge, styles.savedBadge]}>
+                  <View style={[styles.cardIconBadge, { backgroundColor: 'rgba(196,181,253,0.15)' }]}>
                     <Ionicons name="bookmark" size={14} color="#c4b5fd" />
                   </View>
-                  <Text style={styles.cardTitle}>Saved Vehicles</Text>
+                  <Text style={[styles.cardTitle, { color: colors.text }]}>Saved Vehicles</Text>
                 </View>
-                <Text style={styles.cardCount}>{vehicles.length}</Text>
+                <Text style={[styles.cardCount, { color: colors.textMuted }]}>{vehicles.length}</Text>
               </View>
 
               <ScrollView
@@ -266,30 +298,39 @@ export default function HomeScreen({ navigation }) {
               >
                 {vehicles.length === 0 ? (
                   <View style={styles.emptyState}>
-                    <Ionicons name="car-outline" size={28} color="rgba(255,255,255,0.2)" />
-                    <Text style={styles.emptyText}>Save your car to register in one tap</Text>
+                    <Ionicons name="car-outline" size={28} color={colors.textMuted} />
+                    <Text style={[styles.emptyText, { color: colors.textMuted }]}>
+                      Save your car to register in one tap
+                    </Text>
                   </View>
                 ) : (
                   vehicles.map((vehicle) => (
                     <TouchableOpacity
                       key={vehicle.id}
-                      style={styles.listItem}
+                      style={[
+                        styles.listItem,
+                        {
+                          backgroundColor: colors.surface,
+                          borderColor: colors.border,
+                          ...colors.cardShadow,
+                        },
+                      ]}
                       onPress={() => navigation.navigate('QuickRegister', { vehicle })}
                       activeOpacity={0.7}
                     >
                       <View style={styles.listItemRow}>
-                        <View style={styles.listItemIcon}>
-                          <Ionicons name="car-sport" size={15} color="#a5b4fc" />
+                        <View style={[styles.listItemIcon, { backgroundColor: colors.accentBg, borderColor: colors.accentBorder }]}>
+                          <Ionicons name="car-sport" size={15} color={colors.accent} />
                         </View>
                         <View style={{ flex: 1 }}>
-                          <Text style={styles.listItemTitle} numberOfLines={1}>
+                          <Text style={[styles.listItemTitle, { color: colors.text }]} numberOfLines={1}>
                             {vehicle.nickname || vehicle.licence_plate}
                           </Text>
-                          <Text style={styles.listItemSub} numberOfLines={1}>
+                          <Text style={[styles.listItemSub, { color: colors.textSecondary }]} numberOfLines={1}>
                             {vehicle.make} · {vehicle.model}
                           </Text>
                         </View>
-                        <Ionicons name="chevron-forward" size={13} color="rgba(255,255,255,0.25)" />
+                        <Ionicons name="chevron-forward" size={13} color={colors.textMuted} />
                       </View>
                     </TouchableOpacity>
                   ))
@@ -298,15 +339,22 @@ export default function HomeScreen({ navigation }) {
             </View>
 
             {/* History */}
-            <View style={[styles.sideCard, styles.historyCard]}>
+            <View style={[
+              styles.sideCard,
+              {
+                backgroundColor: colors.surfaceSecondary,
+                borderColor: colors.amberBg,
+                ...colors.cardShadow,
+              },
+            ]}>
               <View style={styles.cardHeader}>
                 <View style={styles.cardTitleRow}>
-                  <View style={[styles.cardIconBadge, styles.historyBadge]}>
-                    <Ionicons name="time" size={14} color="#fbbf24" />
+                  <View style={[styles.cardIconBadge, { backgroundColor: colors.amberBg }]}>
+                    <Ionicons name="time" size={14} color={colors.amber} />
                   </View>
-                  <Text style={styles.cardTitle}>History</Text>
+                  <Text style={[styles.cardTitle, { color: colors.text }]}>History</Text>
                 </View>
-                <Text style={styles.cardCount}>{permits.length}</Text>
+                <Text style={[styles.cardCount, { color: colors.textMuted }]}>{permits.length}</Text>
               </View>
 
               <ScrollView
@@ -317,8 +365,10 @@ export default function HomeScreen({ navigation }) {
               >
                 {permits.length === 0 ? (
                   <View style={styles.emptyState}>
-                    <Ionicons name="document-text-outline" size={28} color="rgba(255,255,255,0.2)" />
-                    <Text style={styles.emptyText}>Your past registrations will appear here</Text>
+                    <Ionicons name="document-text-outline" size={28} color={colors.textMuted} />
+                    <Text style={[styles.emptyText, { color: colors.textMuted }]}>
+                      Your past registrations will appear here
+                    </Text>
                   </View>
                 ) : (
                   permits.map((permit) => {
@@ -327,26 +377,44 @@ export default function HomeScreen({ navigation }) {
                     return (
                       <TouchableOpacity
                         key={permit.id}
-                        style={styles.listItem}
+                        style={[
+                          styles.listItem,
+                          {
+                            backgroundColor: colors.surface,
+                            borderColor: colors.border,
+                            ...colors.cardShadow,
+                          },
+                        ]}
                         onPress={() => navigation.navigate('History', { permit })}
                         activeOpacity={0.7}
                       >
                         <View style={styles.listItemRow}>
-                          <View style={[styles.listItemIcon, isActive && styles.listItemIconActive]}>
-                            <Ionicons name="time" size={13} color={isActive ? '#4cd964' : '#fbbf24'} />
+                          <View style={[
+                            styles.listItemIcon,
+                            isActive
+                              ? { backgroundColor: colors.greenBg, borderColor: colors.greenBorder }
+                              : { backgroundColor: colors.amberBg, borderColor: 'transparent' },
+                          ]}>
+                            <Ionicons
+                              name="time"
+                              size={13}
+                              color={isActive ? colors.green : colors.amber}
+                            />
                           </View>
                           <View style={{ flex: 1 }}>
                             <View style={styles.historyItemTop}>
-                              <Text style={styles.listItemTitle} numberOfLines={1}>
+                              <Text style={[styles.listItemTitle, { color: colors.text }]} numberOfLines={1}>
                                 {matched?.nickname || permit.licence_plate}
                               </Text>
-                              {isActive && <View style={styles.activeDot} />}
+                              {isActive && (
+                                <View style={[styles.activeDot, { backgroundColor: colors.green }]} />
+                              )}
                             </View>
-                            <Text style={styles.listItemSub} numberOfLines={1}>
+                            <Text style={[styles.listItemSub, { color: colors.textSecondary }]} numberOfLines={1}>
                               {formatHistoryDate(permit.issue_date)} · {permit.make} {permit.model}
                             </Text>
                           </View>
-                          <Ionicons name="chevron-forward" size={12} color="rgba(255,255,255,0.2)" />
+                          <Ionicons name="chevron-forward" size={12} color={colors.textMuted} />
                         </View>
                       </TouchableOpacity>
                     );
@@ -384,22 +452,18 @@ const styles = StyleSheet.create({
   greeting: {
     fontSize: 26,
     fontFamily: 'Poppins_700Bold',
-    color: '#ffffff',
     letterSpacing: -0.5,
   },
   subGreeting: {
     fontSize: 13,
     fontFamily: 'Poppins_400Regular',
-    color: 'rgba(255,255,255,0.5)',
     marginTop: 2,
   },
   headerIcon: {
     width: 44,
     height: 44,
     borderRadius: 14,
-    backgroundColor: 'rgba(99, 102, 241, 0.15)',
     borderWidth: 1,
-    borderColor: 'rgba(99, 102, 241, 0.25)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -410,9 +474,7 @@ const styles = StyleSheet.create({
   currentCard: {
     borderRadius: 22,
     padding: 18,
-    backgroundColor: 'rgba(255,255,255,0.05)',
     borderWidth: 1,
-    borderColor: 'rgba(99, 102, 241, 0.25)',
   },
   bottomRow: {
     flex: 1,
@@ -424,16 +486,9 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: 20,
     padding: 14,
-    backgroundColor: 'rgba(255,255,255,0.03)',
     borderWidth: 1,
     minHeight: 0,
     marginBottom:14,
-  },
-  savedCard: {
-    borderColor: 'rgba(196, 181, 253, 0.2)',
-  },
-  historyCard: {
-    borderColor: 'rgba(251, 191, 36, 0.15)',
   },
   cardHeader: {
     flexDirection: 'row',
@@ -454,24 +509,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  currentBadge: {
-    backgroundColor: 'rgba(99, 102, 241, 0.2)',
-  },
-  savedBadge: {
-    backgroundColor: 'rgba(196, 181, 253, 0.15)',
-  },
-  historyBadge: {
-    backgroundColor: 'rgba(251, 191, 36, 0.12)',
-  },
   cardTitle: {
     fontSize: 13,
     fontFamily: 'Poppins_700Bold',
-    color: '#ffffff',
   },
   cardCount: {
     fontSize: 12,
     fontFamily: 'Poppins_700Bold',
-    color: 'rgba(255,255,255,0.35)',
   },
   statusPill: {
     flexDirection: 'row',
@@ -502,13 +546,11 @@ const styles = StyleSheet.create({
   vehicleName: {
     fontSize: 22,
     fontFamily: 'Poppins_700Bold',
-    color: '#ffffff',
     marginBottom: 4,
   },
   vehicleDetail: {
     fontSize: 14,
     fontFamily: 'Poppins_400Regular',
-    color: 'rgba(255,255,255,0.6)',
     marginBottom: 8,
   },
   plateRow: {
@@ -519,21 +561,17 @@ const styles = StyleSheet.create({
   plateText: {
     fontSize: 12,
     fontFamily: 'Poppins_400Regular',
-    color: '#8e8e93',
   },
   timerRing: {
     borderWidth: 5,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.2)',
   },
   timerText: {
-    color: '#ffffff',
     fontFamily: 'Poppins_700Bold',
     fontSize: 18,
   },
   timerLabel: {
-    color: '#8e8e93',
     fontFamily: 'Poppins_400Regular',
     fontSize: 10,
     marginTop: 2,
@@ -545,12 +583,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 8,
-    backgroundColor: 'rgba(255,255,255,0.07)',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.12)',
   },
   debugText: {
-    color: 'rgba(255,255,255,0.4)',
     fontSize: 10,
     fontFamily: 'Poppins_400Regular',
   },
@@ -562,12 +597,10 @@ const styles = StyleSheet.create({
     paddingBottom: 4,
   },
   listItem: {
-    backgroundColor: 'rgba(255,255,255,0.05)',
     borderRadius: 14,
     padding: 10,
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: 'rgba(99,102,241,0.18)',
   },
   listItemRow: {
     flexDirection: 'row',
@@ -578,23 +611,15 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 9,
-    backgroundColor: 'rgba(99,102,241,0.2)',
     borderWidth: 1,
-    borderColor: 'rgba(99,102,241,0.3)',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  listItemIconActive: {
-    backgroundColor: 'rgba(76,217,100,0.15)',
-    borderColor: 'rgba(76,217,100,0.25)',
-  },
   listItemTitle: {
-    color: '#ffffff',
     fontFamily: 'Poppins_700Bold',
     fontSize: 12,
   },
   listItemSub: {
-    color: 'rgba(255,255,255,0.5)',
     fontFamily: 'Poppins_400Regular',
     fontSize: 11,
     marginTop: 2,
@@ -609,7 +634,6 @@ const styles = StyleSheet.create({
     width: 7,
     height: 7,
     borderRadius: 4,
-    backgroundColor: '#4cd964',
   },
   emptyState: {
     flex: 1,
@@ -622,7 +646,6 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 12,
     fontFamily: 'Poppins_400Regular',
-    color: 'rgba(255,255,255,0.35)',
     textAlign: 'center',
     lineHeight: 18,
   },
