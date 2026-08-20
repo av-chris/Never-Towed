@@ -1,23 +1,13 @@
 import React, { useRef, useEffect } from 'react';
-import {
-  Animated,
-  StyleSheet,
-  View,
-  TouchableOpacity,
-  useWindowDimensions,
-} from 'react-native';
+import {Animated,StyleSheet,View,TouchableOpacity,useWindowDimensions,Platform,} from 'react-native';
 import { ThemeProvider, useTheme } from './ThemeContext';
-import {
-  NavigationContainer,
-  useNavigationBuilder,
-  createNavigatorFactory,
-  TabRouter,
-} from '@react-navigation/native';
+import {NavigationContainer,useNavigationBuilder,createNavigatorFactory,TabRouter,} from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import { SQLiteProvider } from 'expo-sqlite';
+import * as Notifications from 'expo-notifications';
 
 import LoginScreen from './LoginScreen';
 import HomeScreen from './HomeScreen';
@@ -240,6 +230,14 @@ function ThemedStack() {
 }
 
 export default function App() {
+    useEffect(() => {
+    if (Platform.OS === 'android') {
+      Notifications.setNotificationChannelAsync('default', {
+        name: 'default',
+        importance: Notifications.AndroidImportance.MAX,
+      });
+    }
+  }, []);
   return (
     <SafeAreaProvider>
       <ThemeProvider>

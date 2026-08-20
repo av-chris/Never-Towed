@@ -1,21 +1,27 @@
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Alert, Linking } from 'react-native';
 import { useFonts, Poppins_400Regular, Poppins_700Bold } from '@expo-google-fonts/poppins';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSQLiteContext } from 'expo-sqlite';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useTheme } from './ThemeContext';
+import * as Notifications from 'expo-notifications';
+import { Platform } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function SettingsScreen({ navigation }) {
+
+
+
   const [fontsLoaded] = useFonts({ Poppins_400Regular, Poppins_700Bold });
   const { colors, preference, setPreference } = useTheme();
 
   const [AccountOpen, setAccountOpen] = useState(false);
   const [NotificationOpen, setNotificationOpen] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
-  const [notificationTime, setNotificationTime] = useState('30 minutes before');
+  const [notificationTime, setNotificationTime] = useState('5 Minutes before');
   const [ThemeOpen, setThemeOpen] = useState(false);
   const [DataOpen, setDataOpen] = useState(false);
   const [data, setData] = useState('');
@@ -50,6 +56,14 @@ export default function SettingsScreen({ navigation }) {
       Alert.alert('Error', 'An error occurred');
     }
   };
+  useEffect(() => {
+    async function loadSavedStatus() {
+      const raw = await AsyncStorage.getItem('status');
+      const saved = JSON.parse(raw)
+      setNotificationsEnabled(saved); // or however you want to interpret it
+    }
+    loadSavedStatus();
+  }, []);
 
   if (!fontsLoaded) return null;
 
@@ -58,6 +72,40 @@ export default function SettingsScreen({ navigation }) {
     borderColor: colors.border,
     ...colors.cardShadow,
   };
+
+async function handleNotifications( wantsEnabled){
+
+if(wantsEnabled){
+const {status, canAskAgain} = await Notifications.requestPermissionsAsync();
+if (status === 'granted'){
+setNotificationsEnabled(true)
+          await AsyncStorage.setItem('status', JSON.stringify(true));
+
+}
+if( status === 'denied' || !canAskAgain){
+Alert.alert(
+'Notifications Disabled',
+'You previously denied notification permissions. Enable them in Settings to use this feature.',
+  [
+    { text: 'Cancel', style: 'cancel' },
+    { text: 'Open Settings', onPress: () => Linking.openSettings() },
+  ]
+);
+    setNotificationsEnabled(false)
+    await AsyncStorage.setItem('status', JSON.stringify(false));
+
+}
+
+
+
+  }else{
+
+  setNotificationsEnabled(false);
+  await AsyncStorage.setItem('status', JSON.stringify(false));
+  await Notifications.cancelAllScheduledNotificationsAsync();
+}
+}
+
 
   return (
     <LinearGradient colors={colors.gradientBg} style={styles.container}>
@@ -141,7 +189,7 @@ export default function SettingsScreen({ navigation }) {
                 <View style={[styles.divider, { backgroundColor: colors.divider }]} />
                 <TouchableOpacity
                   style={styles.checkRow}
-                  onPress={() => setNotificationsEnabled(!notificationsEnabled)}
+                  onPress={() =>  handleNotifications(!notificationsEnabled)}
                   activeOpacity={0.7}
                 >
                   <Ionicons
@@ -154,7 +202,7 @@ export default function SettingsScreen({ navigation }) {
                 <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>
                   When should NeverTowed remind you before your parking permit expires?
                 </Text>
-                {['30 minutes before', '1 hour before', '2 hours before', '3 hours before'].map((time) => (
+                {['5 Minutes before', '10 Minutes before', '30 Minutes before', '1 Hour before'].map((time) => (
                   <TouchableOpacity
                     key={time}
                     style={styles.checkRow}
